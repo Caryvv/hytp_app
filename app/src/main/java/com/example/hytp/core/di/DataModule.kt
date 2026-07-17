@@ -2,6 +2,7 @@ package com.example.hytp.core.di
 
 import android.content.Context
 import com.example.hytp.core.data.AuthRepository
+import com.example.hytp.core.data.ShopRepository
 import com.example.hytp.core.data.TokenStore
 import com.example.hytp.core.network.HytpApiService
 import dagger.Module
@@ -29,4 +30,10 @@ object DataModule {
         api: HytpApiService,
         tokenStore: TokenStore,
     ): AuthRepository = AuthRepository(api, tokenStore)
+
+    @Provides
+    @Singleton
+    fun provideShopRepository(
+        api: HytpApiService,
+    ): ShopRepository = ShopRepository(api)
 }

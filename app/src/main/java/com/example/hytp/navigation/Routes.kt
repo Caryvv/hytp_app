@@ -8,4 +8,12 @@ object Routes {
     const val SPLASH = "splash"
     const val LOGIN = "login"
     const val HOME = "home"
+
+    // 交易区（阶段2）
+    const val MALL = "mall"
+    const val PRODUCT_DETAIL = "product/{id}"
+    const val SHOP = "shop/{id}"
+
+    fun productDetail(id: Long): String = "product/$id"
+    fun shop(id: Long): String = "shop/$id"
 }
