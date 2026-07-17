@@ -27,16 +27,43 @@ class TokenStore(private val context: Context) {
     }
 
     private val accessCache = AtomicReference<String?>(null)
+    private val refreshCache = AtomicReference<String?>(null)
 
     /** 供拦截器同步读取的 accessToken（内存缓存）。 */
     fun currentAccessToken(): String? = accessCache.get()
+
+    /** 供拦截器同步读取的 refreshToken（内存缓存）。 */
+    fun currentRefreshToken(): String? = refreshCache.get()
+
+    /** 供拦截器同步更新内存 + 持久化（refresh 续签后调用，用 runBlocking 落盘）。 */
+    fun updateTokensBlocking(accessToken: String, refreshToken: String) {
+        accessCache.set(accessToken)
+        refreshCache.set(refreshToken)
+        kotlinx.coroutines.runBlocking {
+            context.authDataStore.edit { prefs ->
+                prefs[Keys.ACCESS] = accessToken
+                prefs[Keys.REFRESH] = refreshToken
+            }
+        }
+    }
+
+    /** 供拦截器同步清除（refresh 也失效时调用）。 */
+    fun clearBlocking() {
+        accessCache.set(null)
+        refreshCache.set(null)
+        kotlinx.coroutines.runBlocking {
+            context.authDataStore.edit { it.clear() }
+        }
+    }
 
     val isLoggedInFlow: Flow<Boolean> =
         context.authDataStore.data.map { !it[Keys.ACCESS].isNullOrBlank() }
 
     /** 启动时预热内存缓存。 */
     suspend fun warmUp() {
-        accessCache.set(context.authDataStore.data.first()[Keys.ACCESS])
+        val prefs = context.authDataStore.data.first()
+        accessCache.set(prefs[Keys.ACCESS])
+        refreshCache.set(prefs[Keys.REFRESH])
     }
 
     suspend fun saveTokens(accessToken: String, refreshToken: String) {
@@ -45,6 +72,7 @@ class TokenStore(private val context: Context) {
             prefs[Keys.REFRESH] = refreshToken
         }
         accessCache.set(accessToken)
+        refreshCache.set(refreshToken)
     }
 
     suspend fun readRefreshToken(): String? =
@@ -53,5 +81,6 @@ class TokenStore(private val context: Context) {
     suspend fun clear() {
         context.authDataStore.edit { it.clear() }
         accessCache.set(null)
+        refreshCache.set(null)
     }
 }

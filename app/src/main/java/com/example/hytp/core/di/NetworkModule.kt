@@ -46,7 +46,7 @@ object NetworkModule {
             Settings.Secure.ANDROID_ID,
         ) ?: "unknown"
         return AuthInterceptor(
-            tokenProvider = { tokenStore.currentAccessToken() },
+            tokenStore = tokenStore,
             deviceId = deviceId,
         )
     }

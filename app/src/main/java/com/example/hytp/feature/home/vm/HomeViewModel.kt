@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.hytp.core.data.AuthRepository
 import com.example.hytp.core.network.ApiResult
+import com.example.hytp.core.network.BizCode
 import com.example.hytp.core.network.dto.UserProfile
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,6 +19,8 @@ data class HomeUiState(
     val profile: UserProfile? = null,
     val error: String? = null,
     val loggedOut: Boolean = false,
+    /** 会话已失效（access+refresh 均过期，自动续签失败），需重新登录。 */
+    val sessionExpired: Boolean = false,
 )
 
 /**
@@ -42,7 +45,12 @@ class HomeViewModel @Inject constructor(
                 is ApiResult.Success ->
                     _uiState.update { it.copy(loading = false, profile = result.data) }
                 is ApiResult.Error ->
-                    _uiState.update { it.copy(loading = false, error = result.message) }
+                    if (result.code == BizCode.UNAUTHORIZED) {
+                        // 自动续签已失败（refresh 也失效），凭证已清，回登录页
+                        _uiState.update { it.copy(loading = false, sessionExpired = true) }
+                    } else {
+                        _uiState.update { it.copy(loading = false, error = result.message) }
+                    }
                 is ApiResult.Failure ->
                     _uiState.update { it.copy(loading = false, error = "网络异常，请重试") }
             }

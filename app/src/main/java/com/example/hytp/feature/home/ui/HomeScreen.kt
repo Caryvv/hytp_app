@@ -33,8 +33,9 @@ fun HomeScreen(
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
 
-    LaunchedEffect(state.loggedOut) {
-        if (state.loggedOut) onLoggedOut()
+    LaunchedEffect(state.loggedOut, state.sessionExpired) {
+        // 主动退出，或会话失效（自动续签失败）→ 回登录页
+        if (state.loggedOut || state.sessionExpired) onLoggedOut()
     }
 
     Column(
