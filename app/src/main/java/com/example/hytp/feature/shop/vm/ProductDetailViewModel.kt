@@ -3,6 +3,7 @@ package com.example.hytp.feature.shop.vm
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.hytp.core.data.CartRepository
 import com.example.hytp.core.data.ShopRepository
 import com.example.hytp.core.network.ApiResult
 import com.example.hytp.core.network.dto.ProductDetail
@@ -20,15 +21,18 @@ data class ProductDetailUiState(
     val detail: ProductDetail? = null,
     val reviews: List<Review> = emptyList(),
     val error: String? = null,
+    val cartMessage: String? = null,   // 加购结果一次性提示
+    val cartRunning: Boolean = false,
 )
 
 /**
- * 商品详情页：加载详情 + 首页评价（只读）。
+ * 商品详情页：加载详情 + 首页评价 + 加购。
  * productId 通过导航参数经 SavedStateHandle 注入。
  */
 @HiltViewModel
 class ProductDetailViewModel @Inject constructor(
     private val shopRepository: ShopRepository,
+    private val cartRepository: CartRepository,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
@@ -39,6 +43,23 @@ class ProductDetailViewModel @Inject constructor(
 
     init {
         load()
+    }
+
+    fun consumeCartMessage() = _uiState.update { it.copy(cartMessage = null) }
+
+    /** 加入购物车。skuId 可空（无规格商品）。 */
+    fun addToCart(skuId: Long?, qty: Int = 1) {
+        _uiState.update { it.copy(cartRunning = true) }
+        viewModelScope.launch {
+            when (val r = cartRepository.add(productId, skuId, qty)) {
+                is ApiResult.Success ->
+                    _uiState.update { it.copy(cartRunning = false, cartMessage = "已加入购物车") }
+                is ApiResult.Error ->
+                    _uiState.update { it.copy(cartRunning = false, cartMessage = r.message) }
+                is ApiResult.Failure ->
+                    _uiState.update { it.copy(cartRunning = false, cartMessage = "网络异常，请重试") }
+            }
+        }
     }
 
     fun load() {

@@ -16,4 +16,15 @@ object Routes {
 
     fun productDetail(id: Long): String = "product/$id"
     fun shop(id: Long): String = "shop/$id"
+
+    // 交易闭环（阶段3）
+    const val CART = "cart"
+    const val CHECKOUT = "checkout"
+    const val ADDRESS = "address"
+    const val ORDER_LIST = "orders"
+    const val ORDER_DETAIL = "order/{orderNo}"
+    const val REVIEW = "review/{orderNo}/{productId}"
+
+    fun orderDetail(orderNo: String): String = "order/$orderNo"
+    fun review(orderNo: String, productId: Long): String = "review/$orderNo/$productId"
 }

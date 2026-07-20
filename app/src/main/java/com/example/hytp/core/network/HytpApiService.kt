@@ -1,22 +1,43 @@
 package com.example.hytp.core.network
 
+import com.example.hytp.core.network.dto.AddCartRequest
+import com.example.hytp.core.network.dto.Address
+import com.example.hytp.core.network.dto.AddressList
+import com.example.hytp.core.network.dto.AddressRequest
+import com.example.hytp.core.network.dto.CartItem
+import com.example.hytp.core.network.dto.CartList
 import com.example.hytp.core.network.dto.Category
+import com.example.hytp.core.network.dto.CreateOrderRequest
+import com.example.hytp.core.network.dto.CreateOrderResult
 import com.example.hytp.core.network.dto.LoginRequest
 import com.example.hytp.core.network.dto.LoginResponse
 import com.example.hytp.core.network.dto.LogoutRequest
+import com.example.hytp.core.network.dto.MockConfirmRequest
+import com.example.hytp.core.network.dto.Order
+import com.example.hytp.core.network.dto.OrderPreview
+import com.example.hytp.core.network.dto.OrderPreviewRequest
 import com.example.hytp.core.network.dto.PageData
+import com.example.hytp.core.network.dto.PayConfirmResult
+import com.example.hytp.core.network.dto.PayRequest
+import com.example.hytp.core.network.dto.PayResult
 import com.example.hytp.core.network.dto.ProductDetail
 import com.example.hytp.core.network.dto.ProductListItem
 import com.example.hytp.core.network.dto.RefreshRequest
 import com.example.hytp.core.network.dto.RefreshResponse
+import com.example.hytp.core.network.dto.RefundRequest
+import com.example.hytp.core.network.dto.RefundResult
 import com.example.hytp.core.network.dto.Review
+import com.example.hytp.core.network.dto.ReviewRequest
 import com.example.hytp.core.network.dto.ShopPublic
 import com.example.hytp.core.network.dto.SmsSendRequest
 import com.example.hytp.core.network.dto.SmsSendResponse
+import com.example.hytp.core.network.dto.UpdateCartRequest
 import com.example.hytp.core.network.dto.UpdateProfileRequest
 import com.example.hytp.core.network.dto.UserProfile
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.GET
+import retrofit2.http.Header
 import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.Path
@@ -83,4 +104,74 @@ interface HytpApiService {
         @Query("page") page: Int,
         @Query("pageSize") pageSize: Int,
     ): ApiResponse<PageData<ProductListItem>>
+
+    // ---------------- 交易闭环（阶段3，均需登录，走 AuthInterceptor 自动带 token） ----------------
+
+    // 购物车
+    @GET("cart")
+    suspend fun getCart(): ApiResponse<CartList>
+
+    @POST("cart")
+    suspend fun addToCart(@Body body: AddCartRequest): ApiResponse<CartItem>
+
+    @PUT("cart/{id}")
+    suspend fun updateCartQty(@Path("id") id: Long, @Body body: UpdateCartRequest): ApiResponse<CartItem>
+
+    @DELETE("cart/{id}")
+    suspend fun deleteCartItem(@Path("id") id: Long): ApiResponse<Unit>
+
+    @DELETE("cart")
+    suspend fun clearCart(): ApiResponse<Unit>
+
+    // 收货地址
+    @GET("addresses")
+    suspend fun getAddresses(): ApiResponse<AddressList>
+
+    @POST("addresses")
+    suspend fun createAddress(@Body body: AddressRequest): ApiResponse<Address>
+
+    @PUT("addresses/{id}")
+    suspend fun updateAddress(@Path("id") id: Long, @Body body: AddressRequest): ApiResponse<Address>
+
+    @DELETE("addresses/{id}")
+    suspend fun deleteAddress(@Path("id") id: Long): ApiResponse<Unit>
+
+    @POST("addresses/{id}/default")
+    suspend fun setDefaultAddress(@Path("id") id: Long): ApiResponse<Address>
+
+    // 订单
+    @POST("orders/preview")
+    suspend fun previewOrder(@Body body: OrderPreviewRequest): ApiResponse<OrderPreview>
+
+    /** 创建订单，Idempotency-Key 头防重复提交（客户端生成 UUID）。 */
+    @POST("orders")
+    suspend fun createOrder(
+        @Header("Idempotency-Key") idempotencyKey: String,
+        @Body body: CreateOrderRequest,
+    ): ApiResponse<CreateOrderResult>
+
+    @GET("orders")
+    suspend fun getOrders(@QueryMap query: Map<String, String>): ApiResponse<PageData<Order>>
+
+    @GET("orders/{orderNo}")
+    suspend fun getOrderDetail(@Path("orderNo") orderNo: String): ApiResponse<Order>
+
+    @POST("orders/{orderNo}/cancel")
+    suspend fun cancelOrder(@Path("orderNo") orderNo: String): ApiResponse<Order>
+
+    @POST("orders/{orderNo}/confirm")
+    suspend fun confirmOrder(@Path("orderNo") orderNo: String): ApiResponse<Order>
+
+    @POST("orders/{orderNo}/refund")
+    suspend fun refundOrder(@Path("orderNo") orderNo: String, @Body body: RefundRequest): ApiResponse<RefundResult>
+
+    @POST("orders/{orderNo}/review")
+    suspend fun submitReview(@Path("orderNo") orderNo: String, @Body body: ReviewRequest): ApiResponse<Review>
+
+    // 支付（Mock）
+    @POST("pay")
+    suspend fun pay(@Body body: PayRequest): ApiResponse<PayResult>
+
+    @POST("pay/mock/confirm")
+    suspend fun mockConfirmPay(@Body body: MockConfirmRequest): ApiResponse<PayConfirmResult>
 }

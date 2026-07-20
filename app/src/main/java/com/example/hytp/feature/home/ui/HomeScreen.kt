@@ -29,6 +29,7 @@ import com.example.hytp.feature.home.vm.HomeViewModel
 fun HomeScreen(
     onLoggedOut: () -> Unit,
     onOpenMall: () -> Unit,
+    onOpenOrders: () -> Unit,
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -71,6 +72,8 @@ fun HomeScreen(
                 )
                 Spacer(Modifier.height(32.dp))
                 Button(onClick = onOpenMall) { Text("进入汉服商城") }
+                Spacer(Modifier.height(12.dp))
+                OutlinedButton(onClick = onOpenOrders) { Text("我的订单") }
                 Spacer(Modifier.height(12.dp))
                 OutlinedButton(onClick = { viewModel.logout() }) { Text("退出登录") }
             }

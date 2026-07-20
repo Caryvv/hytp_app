@@ -22,6 +22,26 @@ object BizCode {
     const val NOT_FOUND = 1005
     const val SMS_CODE_INVALID = 1102
     const val ACCOUNT_DISABLED = 1103
+
+    // 交易 1200+
+    const val STOCK_NOT_ENOUGH = 1201
+    const val PRODUCT_OFF_SHELF = 1202
+    const val ORDER_STATUS_INVALID = 1203
+    const val CART_EMPTY = 1208
+    const val CART_ITEM_INVALID = 1209
+    const val ORDER_NOT_FOUND = 1210
+    const val ADDRESS_NOT_FOUND = 1211
+    const val ADDRESS_REQUIRED = 1212
+    const val SKU_NOT_FOUND = 1213
+    const val REVIEW_ALREADY_EXISTS = 1214
+    const val REVIEW_NOT_ALLOWED = 1215
+
+    // 支付 1300+
+    const val PAY_FAIL = 1301
+    const val PAY_ORDER_NOT_FOUND = 1302
+    const val PAY_AMOUNT_MISMATCH = 1303
+    const val PAY_ALREADY_PAID = 1304
+    const val REFUND_STATUS_INVALID = 1305
 }
 
 /** 取成功数据，失败返回 null。 */

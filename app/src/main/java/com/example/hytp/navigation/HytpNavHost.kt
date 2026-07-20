@@ -1,13 +1,21 @@
 package com.example.hytp.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.example.hytp.feature.address.ui.AddressScreen
 import com.example.hytp.feature.auth.ui.LoginScreen
+import com.example.hytp.feature.cart.ui.CartScreen
 import com.example.hytp.feature.home.ui.HomeScreen
+import com.example.hytp.feature.order.ui.CheckoutScreen
+import com.example.hytp.feature.order.ui.OrderDetailScreen
+import com.example.hytp.feature.order.ui.OrderListScreen
+import com.example.hytp.feature.order.ui.ReviewScreen
 import com.example.hytp.feature.shop.ui.MallScreen
 import com.example.hytp.feature.shop.ui.ProductDetailScreen
 import com.example.hytp.feature.shop.ui.ShopScreen
@@ -15,7 +23,7 @@ import com.example.hytp.feature.splash.ui.SplashScreen
 
 /**
  * 全局导航图（单 NavHost，对齐 docs/dev/04 §6）。
- * 阶段1：splash → login → home。登录成功后清空 login 回退栈。
+ * 阶段1：splash → login → home。阶段2：商城/详情/店铺。阶段3：购物车/结算/订单/评价。
  */
 @Composable
 fun HytpNavHost() {
@@ -56,6 +64,7 @@ fun HytpNavHost() {
                     }
                 },
                 onOpenMall = { navController.navigate(Routes.MALL) },
+                onOpenOrders = { navController.navigate(Routes.ORDER_LIST) },
             )
         }
 
@@ -72,6 +81,7 @@ fun HytpNavHost() {
             ProductDetailScreen(
                 onBack = { navController.popBackStack() },
                 onShopClick = { id -> navController.navigate(Routes.shop(id)) },
+                onGoCart = { navController.navigate(Routes.CART) },
             )
         }
 
@@ -82,6 +92,77 @@ fun HytpNavHost() {
             ShopScreen(
                 onBack = { navController.popBackStack() },
                 onProductClick = { id -> navController.navigate(Routes.productDetail(id)) },
+            )
+        }
+
+        // ---------------- 交易闭环（阶段3） ----------------
+
+        composable(Routes.CART) {
+            CartScreen(
+                onBack = { navController.popBackStack() },
+                onCheckout = { navController.navigate(Routes.CHECKOUT) },
+                onProductClick = { id -> navController.navigate(Routes.productDetail(id)) },
+            )
+        }
+
+        composable(Routes.CHECKOUT) { entry ->
+            val pickedAddressId by entry.savedStateHandle
+                .getStateFlow<Long?>("pickedAddressId", null)
+                .collectAsStateWithLifecycle()
+            CheckoutScreen(
+                pickedAddressId = pickedAddressId,
+                onBack = { navController.popBackStack() },
+                onManageAddress = { navController.navigate(Routes.ADDRESS) },
+                onOrderCreated = { orderNo ->
+                    // 下单成功：进订单详情去支付，清掉购物车/结算回退栈
+                    navController.navigate(Routes.orderDetail(orderNo)) {
+                        popUpTo(Routes.CART) { inclusive = true }
+                    }
+                },
+            )
+        }
+
+        composable(Routes.ADDRESS) {
+            AddressScreen(
+                onBack = { navController.popBackStack() },
+                onPick = { addressId ->
+                    // 回传选中地址给结算页
+                    navController.previousBackStackEntry
+                        ?.savedStateHandle?.set("pickedAddressId", addressId)
+                    navController.popBackStack()
+                },
+            )
+        }
+
+        composable(Routes.ORDER_LIST) {
+            OrderListScreen(
+                onBack = { navController.popBackStack() },
+                onOrderClick = { orderNo -> navController.navigate(Routes.orderDetail(orderNo)) },
+            )
+        }
+
+        composable(
+            route = Routes.ORDER_DETAIL,
+            arguments = listOf(navArgument("orderNo") { type = NavType.StringType }),
+        ) {
+            OrderDetailScreen(
+                onBack = { navController.popBackStack() },
+                onReview = { orderNo, productId ->
+                    navController.navigate(Routes.review(orderNo, productId))
+                },
+            )
+        }
+
+        composable(
+            route = Routes.REVIEW,
+            arguments = listOf(
+                navArgument("orderNo") { type = NavType.StringType },
+                navArgument("productId") { type = NavType.StringType },
+            ),
+        ) {
+            ReviewScreen(
+                onBack = { navController.popBackStack() },
+                onDone = { navController.popBackStack() },
             )
         }
     }

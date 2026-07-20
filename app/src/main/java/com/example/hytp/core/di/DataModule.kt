@@ -1,7 +1,11 @@
 package com.example.hytp.core.di
 
 import android.content.Context
+import com.example.hytp.core.data.AddressRepository
 import com.example.hytp.core.data.AuthRepository
+import com.example.hytp.core.data.CartRepository
+import com.example.hytp.core.data.OrderRepository
+import com.example.hytp.core.data.PaymentRepository
 import com.example.hytp.core.data.ShopRepository
 import com.example.hytp.core.data.TokenStore
 import com.example.hytp.core.network.HytpApiService
@@ -36,4 +40,28 @@ object DataModule {
     fun provideShopRepository(
         api: HytpApiService,
     ): ShopRepository = ShopRepository(api)
+
+    @Provides
+    @Singleton
+    fun provideCartRepository(
+        api: HytpApiService,
+    ): CartRepository = CartRepository(api)
+
+    @Provides
+    @Singleton
+    fun provideAddressRepository(
+        api: HytpApiService,
+    ): AddressRepository = AddressRepository(api)
+
+    @Provides
+    @Singleton
+    fun provideOrderRepository(
+        api: HytpApiService,
+    ): OrderRepository = OrderRepository(api)
+
+    @Provides
+    @Singleton
+    fun providePaymentRepository(
+        api: HytpApiService,
+    ): PaymentRepository = PaymentRepository(api)
 }

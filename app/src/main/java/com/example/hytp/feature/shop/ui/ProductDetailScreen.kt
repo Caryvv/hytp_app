@@ -15,19 +15,32 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -38,22 +51,33 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.example.hytp.core.network.dto.ProductDetail
+import com.example.hytp.core.network.dto.ProductSku
 import com.example.hytp.core.network.dto.Review
 import com.example.hytp.core.network.dto.ShopPublic
 import com.example.hytp.feature.shop.vm.ProductDetailViewModel
 
 /**
- * 商品详情页（对齐 08 §3.2，只读）：图集/标题价格/规格/图文/评价（情感关键词）/商家卡片。
- * 加购/购买按钮属阶段3，本阶段不放。
+ * 商品详情页（对齐 08 §3.2）：图集/标题价格/规格/图文/评价（情感关键词）/商家卡片。
+ * 阶段3：底部加购/立即购买 + SKU 选择弹层。
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProductDetailScreen(
     onBack: () -> Unit,
     onShopClick: (Long) -> Unit,
+    onGoCart: () -> Unit,
     viewModel: ProductDetailViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val snackbar = remember { SnackbarHostState() }
+    var showSkuSheet by remember { mutableStateOf(false) }
+
+    LaunchedEffect(state.cartMessage) {
+        state.cartMessage?.let {
+            snackbar.showSnackbar(it)
+            viewModel.consumeCartMessage()
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -65,6 +89,24 @@ fun ProductDetailScreen(
                     }
                 },
             )
+        },
+        snackbarHost = { SnackbarHost(snackbar) },
+        bottomBar = {
+            if (state.detail != null) {
+                HorizontalDivider()
+                Row(
+                    Modifier.fillMaxWidth().windowInsetsPadding(WindowInsets.navigationBars).padding(12.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    OutlinedButton(onClick = onGoCart) { Text("购物车") }
+                    Spacer(Modifier.weight(1f))
+                    Button(
+                        onClick = { showSkuSheet = true },
+                        enabled = !state.cartRunning,
+                    ) { Text("加入购物车") }
+                }
+            }
         },
     ) { padding ->
         Box(Modifier.padding(padding).fillMaxSize()) {
@@ -93,6 +135,77 @@ fun ProductDetailScreen(
                         reviews = state.reviews,
                         onShopClick = onShopClick,
                     )
+            }
+        }
+    }
+
+    if (showSkuSheet && state.detail != null) {
+        SkuSheet(
+            detail = state.detail!!,
+            sheetState = rememberModalBottomSheetState(),
+            onDismiss = { showSkuSheet = false },
+            onConfirm = { skuId, qty ->
+                showSkuSheet = false
+                viewModel.addToCart(skuId, qty)
+            },
+        )
+    }
+}
+
+/**
+ * SKU 选择弹层：无规格商品直接选数量；有规格必须先选一个 SKU。
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun SkuSheet(
+    detail: ProductDetail,
+    sheetState: androidx.compose.material3.SheetState,
+    onDismiss: () -> Unit,
+    onConfirm: (skuId: Long?, qty: Int) -> Unit,
+) {
+    var selectedSku by remember { mutableStateOf<ProductSku?>(null) }
+    var qty by remember { mutableStateOf(1) }
+    val hasSku = detail.skus.isNotEmpty()
+
+    ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState) {
+        Column(Modifier.fillMaxWidth().padding(16.dp)) {
+            val shownPrice = selectedSku?.price ?: detail.price
+            Text("¥$shownPrice", color = MaterialTheme.colorScheme.error, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.headlineSmall)
+            Spacer(Modifier.height(4.dp))
+            Text(detail.title, style = MaterialTheme.typography.titleMedium)
+
+            if (hasSku) {
+                Spacer(Modifier.height(16.dp))
+                Text("规格", style = MaterialTheme.typography.titleSmall)
+                Spacer(Modifier.height(8.dp))
+                detail.skus.forEach { sku ->
+                    val label = sku.spec.entries.joinToString(" / ") { "${it.key}:${it.value}" }
+                    val selected = selectedSku?.id == sku.id
+                    OutlinedButton(
+                        onClick = { selectedSku = if (selected) null else sku },
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp),
+                    ) {
+                        Text(if (selected) "● $label（库存 ${sku.stock}）" else "$label（库存 ${sku.stock}）")
+                    }
+                }
+            }
+
+            Spacer(Modifier.height(16.dp))
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text("数量", style = MaterialTheme.typography.titleSmall)
+                Spacer(Modifier.weight(1f))
+                OutlinedButton(onClick = { if (qty > 1) qty-- }, enabled = qty > 1) { Text("−") }
+                Text("  $qty  ", style = MaterialTheme.typography.bodyLarge)
+                OutlinedButton(onClick = { qty++ }) { Text("+") }
+            }
+
+            Spacer(Modifier.height(16.dp))
+            Button(
+                onClick = { onConfirm(selectedSku?.id, qty) },
+                enabled = !hasSku || selectedSku != null,
+                modifier = Modifier.fillMaxWidth().windowInsetsPadding(WindowInsets.navigationBars),
+            ) {
+                Text(if (hasSku && selectedSku == null) "请选择规格" else "加入购物车")
             }
         }
     }
