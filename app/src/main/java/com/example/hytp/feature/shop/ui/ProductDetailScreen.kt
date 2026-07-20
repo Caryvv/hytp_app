@@ -66,16 +66,30 @@ fun ProductDetailScreen(
     onBack: () -> Unit,
     onShopClick: (Long) -> Unit,
     onGoCart: () -> Unit,
+    onRentBooked: (String) -> Unit,
     viewModel: ProductDetailViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbar = remember { SnackbarHostState() }
     var showSkuSheet by remember { mutableStateOf(false) }
+    var showRentSheet by remember { mutableStateOf(false) }
+    // 租赁商品 tradeType=2
+    val isRent = state.detail?.tradeType == 2
 
     LaunchedEffect(state.cartMessage) {
         state.cartMessage?.let {
             snackbar.showSnackbar(it)
             viewModel.consumeCartMessage()
+        }
+    }
+    LaunchedEffect(state.rentMessage, state.rentOrderNo) {
+        state.rentMessage?.let { snackbar.showSnackbar(it) }
+        val no = state.rentOrderNo
+        if (no != null) {
+            viewModel.consumeRent()
+            onRentBooked(no)
+        } else if (state.rentMessage != null) {
+            viewModel.consumeRent()
         }
     }
 
@@ -99,12 +113,21 @@ fun ProductDetailScreen(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    OutlinedButton(onClick = onGoCart) { Text("购物车") }
-                    Spacer(Modifier.weight(1f))
-                    Button(
-                        onClick = { showSkuSheet = true },
-                        enabled = !state.cartRunning,
-                    ) { Text("加入购物车") }
+                    if (isRent) {
+                        // 租赁商品：预约租赁
+                        Button(
+                            onClick = { showRentSheet = true },
+                            enabled = !state.rentRunning,
+                            modifier = Modifier.fillMaxWidth(),
+                        ) { Text(if (state.rentRunning) "处理中…" else "预约租赁") }
+                    } else {
+                        OutlinedButton(onClick = onGoCart) { Text("购物车") }
+                        Spacer(Modifier.weight(1f))
+                        Button(
+                            onClick = { showSkuSheet = true },
+                            enabled = !state.cartRunning,
+                        ) { Text("加入购物车") }
+                    }
                 }
             }
         },
@@ -149,6 +172,84 @@ fun ProductDetailScreen(
                 viewModel.addToCart(skuId, qty)
             },
         )
+    }
+
+    if (showRentSheet && state.detail != null) {
+        RentSheet(
+            detail = state.detail!!,
+            sheetState = rememberModalBottomSheetState(),
+            onDismiss = { showRentSheet = false },
+            onConfirm = { skuId, days, deposit ->
+                showRentSheet = false
+                viewModel.bookRent(skuId, days, deposit)
+            },
+        )
+    }
+}
+
+/**
+ * 租赁预约弹层：选 SKU(有则必选) + 租赁天数(步进) + 押金(默认按日租金×2)。
+ * 展示租金合计 = 日租金 × 天数，实付 = 租金 + 押金。
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun RentSheet(
+    detail: ProductDetail,
+    sheetState: androidx.compose.material3.SheetState,
+    onDismiss: () -> Unit,
+    onConfirm: (skuId: Long?, days: Int, deposit: String) -> Unit,
+) {
+    var selectedSku by remember { mutableStateOf<ProductSku?>(null) }
+    var days by remember { mutableStateOf(1) }
+    val hasSku = detail.skus.isNotEmpty()
+    val dailyRent = (selectedSku?.price ?: detail.price).toBigDecimalOrNull() ?: java.math.BigDecimal.ZERO
+    val rentTotal = dailyRent.multiply(java.math.BigDecimal(days))
+    // 押金默认 = 日租金 × 2
+    val deposit = dailyRent.multiply(java.math.BigDecimal(2))
+    val payAmount = rentTotal.add(deposit)
+
+    ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState) {
+        Column(Modifier.fillMaxWidth().padding(16.dp)) {
+            Text("¥${dailyRent.toPlainString()} / 天", color = MaterialTheme.colorScheme.error, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium)
+            Spacer(Modifier.height(4.dp))
+            Text(detail.title, style = MaterialTheme.typography.titleMedium)
+
+            if (hasSku) {
+                Spacer(Modifier.height(16.dp))
+                Text("规格", style = MaterialTheme.typography.titleSmall)
+                Spacer(Modifier.height(8.dp))
+                detail.skus.forEach { sku ->
+                    val label = sku.spec.entries.joinToString(" / ") { "${it.key}:${it.value}" }
+                    val selected = selectedSku?.id == sku.id
+                    OutlinedButton(
+                        onClick = { selectedSku = if (selected) null else sku },
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp),
+                    ) { Text(if (selected) "● $label" else label) }
+                }
+            }
+
+            Spacer(Modifier.height(16.dp))
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text("租赁天数", style = MaterialTheme.typography.titleSmall)
+                Spacer(Modifier.weight(1f))
+                OutlinedButton(onClick = { if (days > 1) days-- }, enabled = days > 1) { Text("−") }
+                Text("  $days 天  ", style = MaterialTheme.typography.bodyLarge)
+                OutlinedButton(onClick = { days++ }) { Text("+") }
+            }
+
+            Spacer(Modifier.height(12.dp))
+            Text("租金 ¥${rentTotal.toPlainString()} + 押金 ¥${deposit.toPlainString()}", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text("实付 ¥${payAmount.toPlainString()}（押金归还后退回）", style = MaterialTheme.typography.bodyMedium)
+
+            Spacer(Modifier.height(16.dp))
+            Button(
+                onClick = { onConfirm(selectedSku?.id, days, deposit.setScale(2).toPlainString()) },
+                enabled = !hasSku || selectedSku != null,
+                modifier = Modifier.fillMaxWidth().windowInsetsPadding(WindowInsets.navigationBars),
+            ) {
+                Text(if (hasSku && selectedSku == null) "请选择规格" else "确认预约")
+            }
+        }
     }
 }
 

@@ -9,6 +9,10 @@ import com.example.hytp.core.network.dto.CartList
 import com.example.hytp.core.network.dto.Category
 import com.example.hytp.core.network.dto.CreateOrderRequest
 import com.example.hytp.core.network.dto.CreateOrderResult
+import com.example.hytp.core.network.dto.DepositClaimRequest
+import com.example.hytp.core.network.dto.DepositClaimResult
+import com.example.hytp.core.network.dto.RentOrderRequest
+import com.example.hytp.core.network.dto.RentOrderResult
 import com.example.hytp.core.network.dto.LoginRequest
 import com.example.hytp.core.network.dto.LoginResponse
 import com.example.hytp.core.network.dto.LogoutRequest
@@ -167,6 +171,16 @@ interface HytpApiService {
 
     @POST("orders/{orderNo}/review")
     suspend fun submitReview(@Path("orderNo") orderNo: String, @Body body: ReviewRequest): ApiResponse<Review>
+
+    // 租赁 / 品质保障金（交易 P1）
+    @POST("orders/rent")
+    suspend fun createRent(@Body body: RentOrderRequest): ApiResponse<RentOrderResult>
+
+    @POST("orders/{orderNo}/return")
+    suspend fun returnOrder(@Path("orderNo") orderNo: String): ApiResponse<Order>
+
+    @POST("orders/{orderNo}/deposit-claim")
+    suspend fun applyDepositClaim(@Path("orderNo") orderNo: String, @Body body: DepositClaimRequest): ApiResponse<DepositClaimResult>
 
     // 支付（Mock）
     @POST("pay")

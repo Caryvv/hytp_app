@@ -4,8 +4,12 @@ import com.example.hytp.core.network.ApiResult
 import com.example.hytp.core.network.HytpApiService
 import com.example.hytp.core.network.dto.CreateOrderRequest
 import com.example.hytp.core.network.dto.CreateOrderResult
+import com.example.hytp.core.network.dto.DepositClaimRequest
+import com.example.hytp.core.network.dto.DepositClaimResult
 import com.example.hytp.core.network.dto.Order
 import com.example.hytp.core.network.dto.OrderLineRequest
+import com.example.hytp.core.network.dto.RentOrderRequest
+import com.example.hytp.core.network.dto.RentOrderResult
 import com.example.hytp.core.network.dto.OrderPreview
 import com.example.hytp.core.network.dto.OrderPreviewRequest
 import com.example.hytp.core.network.dto.PageData
@@ -86,4 +90,29 @@ class OrderRepository(
 
     suspend fun review(orderNo: String, productId: Long, rating: Int, content: String): ApiResult<Review> =
         safeApiCall { api.submitReview(orderNo, ReviewRequest(productId = productId, rating = rating, content = content)) }
+
+    // 租赁 / 品质保障金（交易 P1）
+
+    /** 租赁下单。rentStart/rentEnd 秒级时间戳。 */
+    suspend fun createRent(
+        productId: Long,
+        addressId: Long,
+        rentStart: Long,
+        rentEnd: Long,
+        depositAmount: String,
+        skuId: Long? = null,
+    ): ApiResult<RentOrderResult> = safeApiCall {
+        api.createRent(RentOrderRequest(
+            productId = productId, skuId = skuId, addressId = addressId,
+            rentStart = rentStart, rentEnd = rentEnd, depositAmount = depositAmount,
+        ))
+    }
+
+    /** 租赁：用户寄回（使用中→待归还）。 */
+    suspend fun returnOrder(orderNo: String): ApiResult<Order> =
+        safeApiCall { api.returnOrder(orderNo) }
+
+    /** 发起品质保障金索赔。 */
+    suspend fun applyDepositClaim(orderNo: String, reason: String, amount: String? = null): ApiResult<DepositClaimResult> =
+        safeApiCall { api.applyDepositClaim(orderNo, DepositClaimRequest(reason = reason, amount = amount)) }
 }

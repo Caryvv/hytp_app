@@ -88,6 +88,8 @@ class OrderDetailViewModel @Inject constructor(
 
     fun confirm() = runAction("已确认收货") { orderRepository.confirm(orderNo) }
 
+    fun returnRent() = runAction("已寄回，等待商家确认") { orderRepository.returnOrder(orderNo) }
+
     fun refund(reason: String) {
         _uiState.update { it.copy(actionRunning = true, error = null) }
         viewModelScope.launch {

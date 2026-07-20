@@ -84,6 +84,7 @@ fun OrderDetailScreen(
                     onConfirm = { viewModel.confirm() },
                     onRefund = { showRefund = true },
                     onReview = { order.items.firstOrNull()?.let { onReview(order.orderNo, it.productId) } },
+                    onReturn = { viewModel.returnRent() },
                 )
             }
         },
@@ -178,6 +179,7 @@ private fun OrderActions(
     onConfirm: () -> Unit,
     onRefund: () -> Unit,
     onReview: () -> Unit,
+    onReturn: () -> Unit,
 ) {
     HorizontalDivider()
     Row(
@@ -197,6 +199,10 @@ private fun OrderActions(
                 OutlinedButton(onClick = onRefund, enabled = !running) { Text("申请售后") }
                 Button(onClick = onConfirm, enabled = !running) { Text(if (running) "处理中…" else "确认收货") }
             }
+            7 -> { // 租赁·使用中
+                Button(onClick = onReturn, enabled = !running) { Text(if (running) "处理中…" else "寄回归还") }
+            }
+            8 -> Text("待商家确认归还", color = MaterialTheme.colorScheme.onSurfaceVariant)
             4 -> { // 已完成
                 Button(onClick = onReview, enabled = !running) { Text("评价") }
             }

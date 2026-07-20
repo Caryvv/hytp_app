@@ -8,5 +8,8 @@ fun orderStatusText(status: Int): String = when (status) {
     4 -> "已完成"
     5 -> "已取消"
     6 -> "售后中"
+    7 -> "使用中"
+    8 -> "待归还"
+    9 -> "已归还"
     else -> "未知"
 }

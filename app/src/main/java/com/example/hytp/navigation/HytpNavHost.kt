@@ -82,6 +82,7 @@ fun HytpNavHost() {
                 onBack = { navController.popBackStack() },
                 onShopClick = { id -> navController.navigate(Routes.shop(id)) },
                 onGoCart = { navController.navigate(Routes.CART) },
+                onRentBooked = { orderNo -> navController.navigate(Routes.orderDetail(orderNo)) },
             )
         }
 

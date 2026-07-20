@@ -35,6 +35,10 @@ object BizCode {
     const val SKU_NOT_FOUND = 1213
     const val REVIEW_ALREADY_EXISTS = 1214
     const val REVIEW_NOT_ALLOWED = 1215
+    const val REFUND_NOT_FOUND = 1216
+    const val RENT_PARAM_INVALID = 1217
+    const val DEPOSIT_CLAIM_NOT_FOUND = 1218
+    const val DEPOSIT_CLAIM_STATUS_INVALID = 1219
 
     // 支付 1300+
     const val PAY_FAIL = 1301

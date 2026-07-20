@@ -121,14 +121,19 @@ data class Order(
     val totalAmount: String = "0.00",
     val payAmount: String = "0.00",
     val commission: String = "0.00",
+    val depositAmount: String = "0.00",
     val status: Int = 0,
     val remark: String = "",
+    val rentStart: Long? = null,
+    val rentEnd: Long? = null,
     val paidAt: Long? = null,
     val shippedAt: Long? = null,
     val finishedAt: Long? = null,
+    val returnedAt: Long? = null,
     val createdAt: Long = 0,
     val addressId: Long? = null,
     val address: Address? = null,
+    val depositRefunded: Int = 0,
     val items: List<OrderItemDto> = emptyList(),
 )
 
@@ -188,4 +193,42 @@ data class ReviewRequest(
     val rating: Int,
     val content: String = "",
     val images: List<String>? = null,
+)
+
+// ---------------- 租赁 / 品质保障金（交易 P1） ----------------
+
+/** 租赁下单请求体。rentStart/rentEnd 为秒级时间戳。 */
+data class RentOrderRequest(
+    val productId: Long,
+    val skuId: Long? = null,
+    val addressId: Long,
+    val rentStart: Long,
+    val rentEnd: Long,
+    val depositAmount: String = "0",
+    val remark: String = "",
+)
+
+/** 租赁下单响应 data。 */
+data class RentOrderResult(
+    val orderNo: String = "",
+    val totalAmount: String = "0.00",
+    val depositAmount: String = "0.00",
+    val payAmount: String = "0.00",
+)
+
+/** 品质保障金索赔请求体。 */
+data class DepositClaimRequest(
+    val reason: String,
+    val amount: String? = null,
+    val evidence: List<String>? = null,
+)
+
+/** 品质保障金索赔响应（对齐 DepositClaim::toArray）。 */
+data class DepositClaimResult(
+    val id: Long,
+    val orderId: Long = 0,
+    val amount: String = "0.00",
+    val reason: String = "",
+    val status: Int = 0,
+    val createdAt: Long = 0,
 )
