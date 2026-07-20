@@ -46,6 +46,13 @@ object BizCode {
     const val PAY_AMOUNT_MISMATCH = 1303
     const val PAY_ALREADY_PAID = 1304
     const val REFUND_STATUS_INVALID = 1305
+
+    // 社交 1400+
+    const val FEED_NOT_FOUND = 1401
+    const val FEED_STATUS_INVALID = 1402
+    const val COMMENT_NOT_FOUND = 1403
+    const val FOLLOW_SELF = 1404
+    const val USER_NOT_FOUND = 1405
 }
 
 /** 取成功数据，失败返回 null。 */

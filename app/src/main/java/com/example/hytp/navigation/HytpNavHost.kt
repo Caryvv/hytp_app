@@ -19,6 +19,10 @@ import com.example.hytp.feature.order.ui.ReviewScreen
 import com.example.hytp.feature.shop.ui.MallScreen
 import com.example.hytp.feature.shop.ui.ProductDetailScreen
 import com.example.hytp.feature.shop.ui.ShopScreen
+import com.example.hytp.feature.social.ui.FeedDetailScreen
+import com.example.hytp.feature.social.ui.FeedListScreen
+import com.example.hytp.feature.social.ui.FeedPublishScreen
+import com.example.hytp.feature.social.ui.UserProfileScreen
 import com.example.hytp.feature.splash.ui.SplashScreen
 
 /**
@@ -65,6 +69,7 @@ fun HytpNavHost() {
                 },
                 onOpenMall = { navController.navigate(Routes.MALL) },
                 onOpenOrders = { navController.navigate(Routes.ORDER_LIST) },
+                onOpenSocial = { navController.navigate(Routes.FEED_LIST) },
             )
         }
 
@@ -164,6 +169,52 @@ fun HytpNavHost() {
             ReviewScreen(
                 onBack = { navController.popBackStack() },
                 onDone = { navController.popBackStack() },
+            )
+        }
+
+        // ---------------- 社交（阶段4 P0） ----------------
+
+        composable(Routes.FEED_LIST) { entry ->
+            val published by entry.savedStateHandle
+                .getStateFlow("feedPublished", false)
+                .collectAsStateWithLifecycle()
+            FeedListScreen(
+                onBack = { navController.popBackStack() },
+                onFeedClick = { id -> navController.navigate(Routes.feedDetail(id)) },
+                onAuthorClick = { id -> navController.navigate(Routes.userProfile(id)) },
+                onPublish = { navController.navigate(Routes.FEED_PUBLISH) },
+                refreshSignal = published,
+                onRefreshConsumed = { entry.savedStateHandle["feedPublished"] = false },
+            )
+        }
+
+        composable(Routes.FEED_PUBLISH) {
+            FeedPublishScreen(
+                onBack = { navController.popBackStack() },
+                onPublished = {
+                    navController.previousBackStackEntry?.savedStateHandle?.set("feedPublished", true)
+                    navController.popBackStack()
+                },
+            )
+        }
+
+        composable(
+            route = Routes.FEED_DETAIL,
+            arguments = listOf(navArgument("id") { type = NavType.StringType }),
+        ) {
+            FeedDetailScreen(
+                onBack = { navController.popBackStack() },
+                onAuthorClick = { id -> navController.navigate(Routes.userProfile(id)) },
+            )
+        }
+
+        composable(
+            route = Routes.USER_PROFILE,
+            arguments = listOf(navArgument("id") { type = NavType.StringType }),
+        ) {
+            UserProfileScreen(
+                onBack = { navController.popBackStack() },
+                onFeedClick = { id -> navController.navigate(Routes.feedDetail(id)) },
             )
         }
     }

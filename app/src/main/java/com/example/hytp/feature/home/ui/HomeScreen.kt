@@ -30,6 +30,7 @@ fun HomeScreen(
     onLoggedOut: () -> Unit,
     onOpenMall: () -> Unit,
     onOpenOrders: () -> Unit,
+    onOpenSocial: () -> Unit,
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -72,6 +73,8 @@ fun HomeScreen(
                 )
                 Spacer(Modifier.height(32.dp))
                 Button(onClick = onOpenMall) { Text("进入汉服商城") }
+                Spacer(Modifier.height(12.dp))
+                OutlinedButton(onClick = onOpenSocial) { Text("同袍动态") }
                 Spacer(Modifier.height(12.dp))
                 OutlinedButton(onClick = onOpenOrders) { Text("我的订单") }
                 Spacer(Modifier.height(12.dp))

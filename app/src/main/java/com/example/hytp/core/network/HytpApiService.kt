@@ -11,8 +11,17 @@ import com.example.hytp.core.network.dto.CreateOrderRequest
 import com.example.hytp.core.network.dto.CreateOrderResult
 import com.example.hytp.core.network.dto.DepositClaimRequest
 import com.example.hytp.core.network.dto.DepositClaimResult
+import com.example.hytp.core.network.dto.AddCommentRequest
+import com.example.hytp.core.network.dto.Feed
+import com.example.hytp.core.network.dto.FeedComment
+import com.example.hytp.core.network.dto.FollowResult
+import com.example.hytp.core.network.dto.FavoriteResult
+import com.example.hytp.core.network.dto.LikeResult
+import com.example.hytp.core.network.dto.PublishFeedRequest
 import com.example.hytp.core.network.dto.RentOrderRequest
 import com.example.hytp.core.network.dto.RentOrderResult
+import com.example.hytp.core.network.dto.ShareResult
+import com.example.hytp.core.network.dto.SocialProfile
 import com.example.hytp.core.network.dto.LoginRequest
 import com.example.hytp.core.network.dto.LoginResponse
 import com.example.hytp.core.network.dto.LogoutRequest
@@ -181,6 +190,57 @@ interface HytpApiService {
 
     @POST("orders/{orderNo}/deposit-claim")
     suspend fun applyDepositClaim(@Path("orderNo") orderNo: String, @Body body: DepositClaimRequest): ApiResponse<DepositClaimResult>
+
+    // ---------------- 社交（阶段4 P0，均需登录） ----------------
+
+    @GET("feeds")
+    suspend fun getFeeds(@QueryMap query: Map<String, String>): ApiResponse<PageData<Feed>>
+
+    @POST("feeds")
+    suspend fun publishFeed(@Body body: PublishFeedRequest): ApiResponse<Feed>
+
+    @GET("feeds/{id}")
+    suspend fun getFeedDetail(@Path("id") id: Long): ApiResponse<Feed>
+
+    @DELETE("feeds/{id}")
+    suspend fun deleteFeed(@Path("id") id: Long): ApiResponse<Unit>
+
+    @POST("feeds/{id}/like")
+    suspend fun likeFeed(@Path("id") id: Long): ApiResponse<LikeResult>
+
+    @POST("feeds/{id}/unlike")
+    suspend fun unlikeFeed(@Path("id") id: Long): ApiResponse<LikeResult>
+
+    @POST("feeds/{id}/favorite")
+    suspend fun favoriteFeed(@Path("id") id: Long): ApiResponse<FavoriteResult>
+
+    @POST("feeds/{id}/unfavorite")
+    suspend fun unfavoriteFeed(@Path("id") id: Long): ApiResponse<FavoriteResult>
+
+    @POST("feeds/{id}/share")
+    suspend fun shareFeed(@Path("id") id: Long): ApiResponse<ShareResult>
+
+    @GET("feeds/{id}/comments")
+    suspend fun getFeedComments(
+        @Path("id") id: Long,
+        @Query("page") page: Int,
+        @Query("pageSize") pageSize: Int,
+    ): ApiResponse<PageData<FeedComment>>
+
+    @POST("feeds/{id}/comments")
+    suspend fun addFeedComment(@Path("id") id: Long, @Body body: AddCommentRequest): ApiResponse<FeedComment>
+
+    @POST("users/{id}/follow")
+    suspend fun followUser(@Path("id") id: Long): ApiResponse<FollowResult>
+
+    @POST("users/{id}/unfollow")
+    suspend fun unfollowUser(@Path("id") id: Long): ApiResponse<FollowResult>
+
+    @GET("users/{id}/profile")
+    suspend fun getUserPublicProfile(@Path("id") id: Long): ApiResponse<SocialProfile>
+
+    @GET("users/{id}/feeds")
+    suspend fun getUserFeeds(@Path("id") id: Long, @QueryMap query: Map<String, String>): ApiResponse<PageData<Feed>>
 
     // 支付（Mock）
     @POST("pay")

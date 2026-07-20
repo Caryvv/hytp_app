@@ -18,6 +18,7 @@ import kotlinx.coroutines.flow.Flow
 class AuthRepository(
     private val api: HytpApiService,
     private val tokenStore: TokenStore,
+    private val sessionManager: UserSessionManager,
 ) {
 
     val isLoggedInFlow: Flow<Boolean> = tokenStore.isLoggedInFlow
@@ -33,13 +34,19 @@ class AuthRepository(
         }
         if (result is ApiResult.Success) {
             tokenStore.saveTokens(result.data.accessToken, result.data.refreshToken)
+            sessionManager.setUserId(result.data.user.id)
         }
         return result
     }
 
-    /** 当前用户资料。 */
-    suspend fun getProfile(): ApiResult<UserProfile> =
-        safeApiCall { api.getProfile() }
+    /** 当前用户资料。成功时顺带补全会话缓存的 userId。 */
+    suspend fun getProfile(): ApiResult<UserProfile> {
+        val result = safeApiCall { api.getProfile() }
+        if (result is ApiResult.Success) {
+            sessionManager.setUserId(result.data.id)
+        }
+        return result
+    }
 
     /** 退出登录：拉黑 refreshToken 并清理本地凭证（无论后端是否成功都清本地）。 */
     suspend fun logout() {
@@ -48,5 +55,6 @@ class AuthRepository(
             runCatching { safeApiCall { api.logout(LogoutRequest(refreshToken = refresh)) } }
         }
         tokenStore.clear()
+        sessionManager.clear()
     }
 }

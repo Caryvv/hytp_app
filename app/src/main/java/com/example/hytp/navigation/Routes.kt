@@ -27,4 +27,13 @@ object Routes {
 
     fun orderDetail(orderNo: String): String = "order/$orderNo"
     fun review(orderNo: String, productId: Long): String = "review/$orderNo/$productId"
+
+    // 社交（阶段4 P0）
+    const val FEED_LIST = "feeds"
+    const val FEED_PUBLISH = "feed/publish"
+    const val FEED_DETAIL = "feed/{id}"
+    const val USER_PROFILE = "user/{id}"
+
+    fun feedDetail(id: Long): String = "feed/$id"
+    fun userProfile(id: Long): String = "user/$id"
 }

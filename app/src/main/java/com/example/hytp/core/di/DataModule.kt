@@ -7,7 +7,9 @@ import com.example.hytp.core.data.CartRepository
 import com.example.hytp.core.data.OrderRepository
 import com.example.hytp.core.data.PaymentRepository
 import com.example.hytp.core.data.ShopRepository
+import com.example.hytp.core.data.SocialRepository
 import com.example.hytp.core.data.TokenStore
+import com.example.hytp.core.data.UserSessionManager
 import com.example.hytp.core.network.HytpApiService
 import dagger.Module
 import dagger.Provides
@@ -30,10 +32,15 @@ object DataModule {
 
     @Provides
     @Singleton
+    fun provideUserSessionManager(): UserSessionManager = UserSessionManager()
+
+    @Provides
+    @Singleton
     fun provideAuthRepository(
         api: HytpApiService,
         tokenStore: TokenStore,
-    ): AuthRepository = AuthRepository(api, tokenStore)
+        sessionManager: UserSessionManager,
+    ): AuthRepository = AuthRepository(api, tokenStore, sessionManager)
 
     @Provides
     @Singleton
@@ -64,4 +71,10 @@ object DataModule {
     fun providePaymentRepository(
         api: HytpApiService,
     ): PaymentRepository = PaymentRepository(api)
+
+    @Provides
+    @Singleton
+    fun provideSocialRepository(
+        api: HytpApiService,
+    ): SocialRepository = SocialRepository(api)
 }
