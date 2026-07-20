@@ -4,6 +4,8 @@ import android.content.Context
 import com.example.hytp.core.data.AddressRepository
 import com.example.hytp.core.data.AuthRepository
 import com.example.hytp.core.data.CartRepository
+import com.example.hytp.core.data.ChatRepository
+import com.example.hytp.core.data.GroupRepository
 import com.example.hytp.core.data.OrderRepository
 import com.example.hytp.core.data.PaymentRepository
 import com.example.hytp.core.data.ShopRepository
@@ -77,4 +79,16 @@ object DataModule {
     fun provideSocialRepository(
         api: HytpApiService,
     ): SocialRepository = SocialRepository(api)
+
+    @Provides
+    @Singleton
+    fun provideChatRepository(
+        api: HytpApiService,
+    ): ChatRepository = ChatRepository(api)
+
+    @Provides
+    @Singleton
+    fun provideGroupRepository(
+        api: HytpApiService,
+    ): GroupRepository = GroupRepository(api)
 }

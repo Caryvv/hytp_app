@@ -3,6 +3,7 @@ package com.example.hytp.feature.social.vm
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.hytp.core.data.ChatRepository
 import com.example.hytp.core.data.SocialRepository
 import com.example.hytp.core.network.ApiResult
 import com.example.hytp.core.network.dto.Feed
@@ -28,6 +29,7 @@ data class UserProfileUiState(
 @HiltViewModel
 class UserProfileViewModel @Inject constructor(
     private val socialRepository: SocialRepository,
+    private val chatRepository: ChatRepository,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
@@ -59,6 +61,19 @@ class UserProfileViewModel @Inject constructor(
             when (val r = socialRepository.getUserFeeds(targetId, page = 1, pageSize = 20)) {
                 is ApiResult.Success -> _uiState.update { it.copy(feeds = r.data.list) }
                 else -> Unit
+            }
+        }
+    }
+
+    /** 发私信：打开/创建会话，成功回调返回会话 id + 对方昵称。 */
+    fun openConversation(onOpened: (Long, String) -> Unit) {
+        val p = _uiState.value.profile ?: return
+        if (p.isSelf) return
+        viewModelScope.launch {
+            when (val r = chatRepository.openConversation(targetId)) {
+                is ApiResult.Success -> onOpened(r.data.id, p.nickname)
+                is ApiResult.Error -> _uiState.update { it.copy(error = r.message) }
+                is ApiResult.Failure -> _uiState.update { it.copy(error = "网络异常，请重试") }
             }
         }
     }

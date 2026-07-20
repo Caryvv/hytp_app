@@ -12,8 +12,20 @@ import com.example.hytp.core.network.dto.CreateOrderResult
 import com.example.hytp.core.network.dto.DepositClaimRequest
 import com.example.hytp.core.network.dto.DepositClaimResult
 import com.example.hytp.core.network.dto.AddCommentRequest
+import com.example.hytp.core.network.dto.ChatMessage
+import com.example.hytp.core.network.dto.ChatMessageList
+import com.example.hytp.core.network.dto.Conversation
+import com.example.hytp.core.network.dto.CreateGroupRequest
 import com.example.hytp.core.network.dto.Feed
 import com.example.hytp.core.network.dto.FeedComment
+import com.example.hytp.core.network.dto.GroupMemberItem
+import com.example.hytp.core.network.dto.GroupMessage
+import com.example.hytp.core.network.dto.GroupMessageList
+import com.example.hytp.core.network.dto.OpenConversationRequest
+import com.example.hytp.core.network.dto.OpenConversationResult
+import com.example.hytp.core.network.dto.SendGroupMessageRequest
+import com.example.hytp.core.network.dto.SendMessageRequest
+import com.example.hytp.core.network.dto.SocialGroup
 import com.example.hytp.core.network.dto.FollowResult
 import com.example.hytp.core.network.dto.FavoriteResult
 import com.example.hytp.core.network.dto.LikeResult
@@ -241,6 +253,46 @@ interface HytpApiService {
 
     @GET("users/{id}/feeds")
     suspend fun getUserFeeds(@Path("id") id: Long, @QueryMap query: Map<String, String>): ApiResponse<PageData<Feed>>
+
+    // ---------------- 私信（社交 P1，轮询） ----------------
+
+    @GET("chat/conversations")
+    suspend fun getConversations(@QueryMap query: Map<String, String>): ApiResponse<PageData<Conversation>>
+
+    @POST("chat/open")
+    suspend fun openConversation(@Body body: OpenConversationRequest): ApiResponse<OpenConversationResult>
+
+    @GET("chat/messages")
+    suspend fun getChatMessages(@QueryMap query: Map<String, String>): ApiResponse<ChatMessageList>
+
+    @POST("chat/messages")
+    suspend fun sendChatMessage(@Body body: SendMessageRequest): ApiResponse<ChatMessage>
+
+    // ---------------- 社群 ----------------
+
+    @GET("groups")
+    suspend fun getGroups(@QueryMap query: Map<String, String>): ApiResponse<PageData<SocialGroup>>
+
+    @POST("groups")
+    suspend fun createGroup(@Body body: CreateGroupRequest): ApiResponse<SocialGroup>
+
+    @GET("groups/{id}")
+    suspend fun getGroupDetail(@Path("id") id: Long): ApiResponse<SocialGroup>
+
+    @POST("groups/{id}/join")
+    suspend fun joinGroup(@Path("id") id: Long): ApiResponse<SocialGroup>
+
+    @POST("groups/{id}/quit")
+    suspend fun quitGroup(@Path("id") id: Long): ApiResponse<SocialGroup>
+
+    @GET("groups/{id}/members")
+    suspend fun getGroupMembers(@Path("id") id: Long, @QueryMap query: Map<String, String>): ApiResponse<PageData<GroupMemberItem>>
+
+    @GET("groups/{id}/messages")
+    suspend fun getGroupMessages(@Path("id") id: Long, @QueryMap query: Map<String, String>): ApiResponse<GroupMessageList>
+
+    @POST("groups/{id}/messages")
+    suspend fun sendGroupMessage(@Path("id") id: Long, @Body body: SendGroupMessageRequest): ApiResponse<GroupMessage>
 
     // 支付（Mock）
     @POST("pay")

@@ -36,4 +36,13 @@ object Routes {
 
     fun feedDetail(id: Long): String = "feed/$id"
     fun userProfile(id: Long): String = "user/$id"
+
+    // 私信 + 社群（社交 P1）
+    const val CONVERSATION_LIST = "conversations"
+    const val CHAT = "chat/{id}"
+    const val GROUP_LIST = "groups"
+    const val GROUP_CHAT = "group/{id}"
+
+    fun chat(id: Long): String = "chat/$id"
+    fun groupChat(id: Long): String = "group/$id"
 }

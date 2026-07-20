@@ -53,6 +53,11 @@ object BizCode {
     const val COMMENT_NOT_FOUND = 1403
     const val FOLLOW_SELF = 1404
     const val USER_NOT_FOUND = 1405
+    const val CONVERSATION_NOT_FOUND = 1406
+    const val GROUP_NOT_FOUND = 1407
+    const val NOT_GROUP_MEMBER = 1408
+    const val ALREADY_GROUP_MEMBER = 1409
+    const val GROUP_FORBIDDEN = 1410
 }
 
 /** 取成功数据，失败返回 null。 */

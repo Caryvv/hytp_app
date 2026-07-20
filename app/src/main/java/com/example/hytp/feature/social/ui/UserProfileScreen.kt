@@ -47,6 +47,7 @@ import com.example.hytp.feature.social.vm.UserProfileViewModel
 fun UserProfileScreen(
     onBack: () -> Unit,
     onFeedClick: (Long) -> Unit,
+    onMessage: (Long, String) -> Unit,
     viewModel: UserProfileViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -77,7 +78,13 @@ fun UserProfileScreen(
 
                 state.profile != null ->
                     LazyColumn(Modifier.fillMaxSize()) {
-                        item { ProfileHeader(state.profile!!, onToggleFollow = { viewModel.toggleFollow() }) }
+                        item {
+                            ProfileHeader(
+                                state.profile!!,
+                                onToggleFollow = { viewModel.toggleFollow() },
+                                onMessage = { viewModel.openConversation(onMessage) },
+                            )
+                        }
                         item {
                             HorizontalDivider()
                             Text("TA 的动态", style = MaterialTheme.typography.titleSmall, modifier = Modifier.padding(16.dp))
@@ -105,7 +112,7 @@ fun UserProfileScreen(
 }
 
 @Composable
-private fun ProfileHeader(p: SocialProfile, onToggleFollow: () -> Unit) {
+private fun ProfileHeader(p: SocialProfile, onToggleFollow: () -> Unit, onMessage: () -> Unit) {
     Column(Modifier.fillMaxWidth().padding(16.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             AsyncImage(
@@ -122,6 +129,8 @@ private fun ProfileHeader(p: SocialProfile, onToggleFollow: () -> Unit) {
                 }
             }
             if (!p.isSelf) {
+                OutlinedButton(onClick = onMessage) { Text("发私信") }
+                Spacer(Modifier.width(8.dp))
                 if (p.isFollowed) {
                     OutlinedButton(onClick = onToggleFollow) { Text("已关注") }
                 } else {
