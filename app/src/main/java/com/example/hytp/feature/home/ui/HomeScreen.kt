@@ -100,6 +100,12 @@ fun HomeScreen(
                             semantic = if (p.memberLevel == 1) TagSemantic.Member else TagSemantic.Info,
                         )
                     }
+                    Spacer(Modifier.height(Spacing.xs))
+                    Text(
+                        text = "代币余额：${p.balance} ¥",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.tertiary,
+                    )
 
                     Spacer(Modifier.height(Spacing.lg))
 

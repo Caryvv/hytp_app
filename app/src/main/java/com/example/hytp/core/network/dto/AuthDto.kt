@@ -61,6 +61,7 @@ data class UserProfile(
     val city: String? = null,
     val memberLevel: Int = 0,
     val memberExpireAt: Long? = null,
+    val balance: String = "0.00",
 )
 
 /** PUT /user/profile 请求（仅传要改的字段）。 */

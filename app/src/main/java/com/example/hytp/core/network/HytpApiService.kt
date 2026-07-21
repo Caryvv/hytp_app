@@ -58,11 +58,14 @@ import com.example.hytp.core.network.dto.SmsSendRequest
 import com.example.hytp.core.network.dto.SmsSendResponse
 import com.example.hytp.core.network.dto.UpdateCartRequest
 import com.example.hytp.core.network.dto.UpdateProfileRequest
+import com.example.hytp.core.network.dto.UploadResult
 import com.example.hytp.core.network.dto.UserProfile
+import okhttp3.MultipartBody
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.Header
+import retrofit2.http.Multipart
 import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.Path
@@ -300,4 +303,9 @@ interface HytpApiService {
 
     @POST("pay/mock/confirm")
     suspend fun mockConfirmPay(@Body body: MockConfirmRequest): ApiResponse<PayConfirmResult>
+
+    // 文件上传
+    @Multipart
+    @POST("upload")
+    suspend fun uploadFile(@retrofit2.http.Part file: MultipartBody.Part): ApiResponse<UploadResult>
 }

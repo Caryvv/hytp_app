@@ -145,13 +145,16 @@ data class PayRequest(
     val channel: Int = 1,
 )
 
-/** 发起支付响应 data（Mock 参数）。 */
+/** 发起支付响应 data。 */
 data class PayResult(
     val payNo: String = "",
     val orderNo: String = "",
     val amount: String = "0.00",
     val channel: Int = 1,
-    val mock: Boolean = true,
+    val channelText: String = "",
+    val balanceBefore: String? = null,
+    val balanceAfter: String? = null,
+    val mock: Boolean? = null,
 )
 
 /** Mock 回调请求体。 */

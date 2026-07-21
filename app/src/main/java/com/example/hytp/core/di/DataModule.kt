@@ -11,6 +11,7 @@ import com.example.hytp.core.data.PaymentRepository
 import com.example.hytp.core.data.ShopRepository
 import com.example.hytp.core.data.SocialRepository
 import com.example.hytp.core.data.TokenStore
+import com.example.hytp.core.data.UploadRepository
 import com.example.hytp.core.data.UserSessionManager
 import com.example.hytp.core.network.HytpApiService
 import dagger.Module
@@ -91,4 +92,11 @@ object DataModule {
     fun provideGroupRepository(
         api: HytpApiService,
     ): GroupRepository = GroupRepository(api)
+
+    @Provides
+    @Singleton
+    fun provideUploadRepository(
+        api: HytpApiService,
+        @ApplicationContext context: Context,
+    ): UploadRepository = UploadRepository(api, context)
 }

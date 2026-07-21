@@ -102,6 +102,12 @@ fun MineScreen(
                             style = MaterialTheme.typography.titleLarge,
                         )
                         Spacer(Modifier.height(Spacing.xs))
+                        Text(
+                            text = "余额 ${p.balance} ¥",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.tertiary,
+                        )
+                        Spacer(Modifier.height(Spacing.xs))
                         DynastyTag(
                             text = if (p.memberLevel == 1) "高级会员" else "普通用户",
                             semantic = if (p.memberLevel == 1) TagSemantic.Member else TagSemantic.Info,
