@@ -36,11 +36,12 @@ import com.example.hytp.feature.social.vm.FeedTab
 
 /**
  * 动态流：推荐/关注双 Tab + 分页列表 + FAB 发布。
+ * onBack 为 null 时隐藏返回按钮（用于 Tab 根页面）。
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FeedListScreen(
-    onBack: () -> Unit,
+    onBack: (() -> Unit)?,
     onFeedClick: (Long) -> Unit,
     onAuthorClick: (Long) -> Unit,
     onPublish: () -> Unit,
@@ -71,8 +72,10 @@ fun FeedListScreen(
         topBar = {
             TopAppBar(
                 title = { Text("同袍动态") },
-                navigationIcon = {
-                    IconButton(onClick = onBack) { Text("‹", style = MaterialTheme.typography.headlineMedium) }
+                navigationIcon = if (onBack != null) {
+                    { IconButton(onClick = onBack) { Text("‹", style = MaterialTheme.typography.headlineMedium) } }
+                } else {
+                    {}
                 },
             )
         },
