@@ -69,7 +69,7 @@ fun ReviewScreen(
                     Text(
                         text = if (i <= rating) "★" else "☆",
                         style = MaterialTheme.typography.headlineMedium,
-                        color = MaterialTheme.colorScheme.error,
+                        color = MaterialTheme.colorScheme.tertiary,
                         modifier = Modifier.clickable { rating = i }.padding(end = 4.dp),
                     )
                 }

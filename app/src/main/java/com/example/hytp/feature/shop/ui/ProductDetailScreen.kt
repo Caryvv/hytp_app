@@ -210,7 +210,7 @@ private fun RentSheet(
 
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState) {
         Column(Modifier.fillMaxWidth().padding(16.dp)) {
-            Text("¥${dailyRent.toPlainString()} / 天", color = MaterialTheme.colorScheme.error, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium)
+            Text("¥${dailyRent.toPlainString()} / 天", color = MaterialTheme.colorScheme.tertiary, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium)
             Spacer(Modifier.height(4.dp))
             Text(detail.title, style = MaterialTheme.typography.titleMedium)
 
@@ -333,7 +333,7 @@ private fun DetailContent(
             Column(Modifier.padding(16.dp)) {
                 Text(
                     text = "¥${detail.price}",
-                    color = MaterialTheme.colorScheme.error,
+                    color = MaterialTheme.colorScheme.tertiary,
                     fontWeight = FontWeight.Bold,
                     style = MaterialTheme.typography.headlineSmall,
                 )
@@ -435,7 +435,7 @@ private fun ShopCard(shop: ShopPublic, onClick: () -> Unit) {
 @Composable
 private fun ReviewItem(review: Review) {
     Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)) {
-        Text("${"★".repeat(review.rating)}${"☆".repeat(5 - review.rating)}", color = MaterialTheme.colorScheme.error)
+        Text("${"★".repeat(review.rating)}${"☆".repeat(5 - review.rating)}", color = MaterialTheme.colorScheme.tertiary)
         if (review.content.isNotBlank()) {
             Spacer(Modifier.height(4.dp))
             Text(review.content, style = MaterialTheme.typography.bodyMedium)

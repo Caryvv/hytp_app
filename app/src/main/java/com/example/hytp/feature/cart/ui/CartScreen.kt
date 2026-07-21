@@ -164,7 +164,7 @@ private fun CartRow(
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     "¥${item.price}",
-                    color = MaterialTheme.colorScheme.error,
+                    color = MaterialTheme.colorScheme.tertiary,
                     fontWeight = FontWeight.Bold,
                 )
                 Spacer(Modifier.weight(1f))

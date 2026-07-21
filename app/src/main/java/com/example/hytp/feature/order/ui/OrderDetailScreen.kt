@@ -162,7 +162,7 @@ private fun OrderDetailContent(order: Order) {
                 Row { Text("商品总额", Modifier.weight(1f), color = MaterialTheme.colorScheme.onSurfaceVariant); Text("¥${order.totalAmount}") }
                 Row {
                     Text("实付款", Modifier.weight(1f), color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    Text("¥${order.payAmount}", color = MaterialTheme.colorScheme.error, fontWeight = FontWeight.Bold)
+                    Text("¥${order.payAmount}", color = MaterialTheme.colorScheme.tertiary, fontWeight = FontWeight.Bold)
                 }
             }
         }

@@ -72,7 +72,7 @@ fun CheckoutScreen(
                     Text("实付：", style = MaterialTheme.typography.bodyLarge)
                     Text(
                         "¥${preview.totalAmount}",
-                        color = MaterialTheme.colorScheme.error,
+                        color = MaterialTheme.colorScheme.tertiary,
                         fontWeight = FontWeight.Bold,
                         style = MaterialTheme.typography.titleLarge,
                     )

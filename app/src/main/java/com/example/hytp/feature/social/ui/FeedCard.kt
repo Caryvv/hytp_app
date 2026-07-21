@@ -83,7 +83,7 @@ fun FeedCard(
         Row(horizontalArrangement = Arrangement.spacedBy(20.dp)) {
             Text(
                 text = "${if (feed.isLiked) "♥" else "♡"} ${feed.likeCount}",
-                color = if (feed.isLiked) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant,
+                color = if (feed.isLiked) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onSurfaceVariant,
                 style = MaterialTheme.typography.labelLarge,
                 modifier = Modifier.clickable { onLike() },
             )
