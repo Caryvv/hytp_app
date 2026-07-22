@@ -28,7 +28,9 @@ class UploadRepository @Inject constructor(
      */
     suspend fun uploadImage(uri: Uri): ApiResult<UploadResult> {
         val file = copyToCache(uri) ?: return ApiResult.Failure(Exception("无法读取文件"))
-        val requestBody = file.asRequestBody("image/*".toMediaTypeOrNull())
+        // 用真实 MIME（如 image/png），后端按具体类型白名单校验，image/* 会被拒
+        val mime = context.contentResolver.getType(uri) ?: "image/jpeg"
+        val requestBody = file.asRequestBody(mime.toMediaTypeOrNull())
         val part = MultipartBody.Part.createFormData("file", file.name, requestBody)
         val result = safeApiCall { api.uploadFile(part) }
         // 上传后清理临时文件
