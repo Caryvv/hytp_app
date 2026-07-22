@@ -27,6 +27,7 @@ import com.example.hytp.feature.group.ui.GroupChatScreen
 import com.example.hytp.feature.group.ui.GroupListScreen
 import com.example.hytp.feature.home.ui.HomeScreen
 import com.example.hytp.feature.mine.ui.MineScreen
+import com.example.hytp.feature.mine.ui.RechargeScreen
 import com.example.hytp.feature.order.ui.OrderDetailScreen
 import com.example.hytp.feature.order.ui.OrderListScreen
 import com.example.hytp.feature.order.ui.ReviewScreen
@@ -336,10 +337,27 @@ private fun MineNavHost(
         startDestination = TabRoutes.MINE_ROOT,
         modifier = modifier,
     ) {
-        composable(TabRoutes.MINE_ROOT) {
+        composable(TabRoutes.MINE_ROOT) { entry ->
+            // 充值成功后回传信号，回到「我的」时刷新余额
+            val rechargedCoin = entry.savedStateHandle
+                .getStateFlow<Int?>("recharged_coin", null)
+                .collectAsStateWithLifecycle()
             MineScreen(
                 onLoggedOut = onLoggedOut,
                 onOpenOrders = { navController.navigate(Routes.ORDER_LIST) },
+                onOpenRecharge = { navController.navigate(Routes.RECHARGE) },
+                refreshSignal = rechargedCoin.value,
+                onRefreshConsumed = { entry.savedStateHandle["recharged_coin"] = null },
+            )
+        }
+        composable(Routes.RECHARGE) {
+            RechargeScreen(
+                onBack = { navController.popBackStack() },
+                onRecharged = { coin ->
+                    navController.previousBackStackEntry
+                        ?.savedStateHandle?.set("recharged_coin", coin)
+                    navController.popBackStack()
+                },
             )
         }
         composable(Routes.ORDER_LIST) {

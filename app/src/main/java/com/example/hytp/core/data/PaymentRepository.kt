@@ -6,6 +6,8 @@ import com.example.hytp.core.network.dto.MockConfirmRequest
 import com.example.hytp.core.network.dto.PayConfirmResult
 import com.example.hytp.core.network.dto.PayRequest
 import com.example.hytp.core.network.dto.PayResult
+import com.example.hytp.core.network.dto.RechargeRequest
+import com.example.hytp.core.network.dto.RechargeResult
 import com.example.hytp.core.network.safeApiCall
 
 /**
@@ -21,4 +23,8 @@ class PaymentRepository(
     /** Mock：模拟第三方回调，触发服务端改单。 */
     suspend fun mockConfirm(payNo: String): ApiResult<PayConfirmResult> =
         safeApiCall { api.mockConfirmPay(MockConfirmRequest(payNo)) }
+
+    /** 充值同袍币（Mock 直接到账）。coin 为同袍币数量（100 同袍币 = 1 元）。 */
+    suspend fun recharge(coin: Int): ApiResult<RechargeResult> =
+        safeApiCall { api.recharge(RechargeRequest(coin)) }
 }

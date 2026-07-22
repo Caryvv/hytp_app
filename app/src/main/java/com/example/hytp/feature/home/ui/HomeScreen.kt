@@ -102,7 +102,7 @@ fun HomeScreen(
                     }
                     Spacer(Modifier.height(Spacing.xs))
                     Text(
-                        text = "代币余额：${p.balance} ¥",
+                        text = "同袍币：${((p.balance.toDoubleOrNull() ?: 0.0) * 100).toLong()}",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.tertiary,
                     )

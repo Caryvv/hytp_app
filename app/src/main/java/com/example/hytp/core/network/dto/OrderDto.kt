@@ -169,6 +169,22 @@ data class PayConfirmResult(
     val paid: Boolean = false,
 )
 
+// ---------------- 同袍币充值（Mock 通道） ----------------
+
+/** 充值请求体。coin 为同袍币数量（100 同袍币 = 1 元）。 */
+data class RechargeRequest(
+    val coin: Int,
+)
+
+/** 充值响应 data（对齐 WalletService::recharge）。 */
+data class RechargeResult(
+    val rechargeNo: String = "",
+    val coin: Int = 0,
+    val amountYuan: String = "0.00",
+    val balanceCoin: Int = 0,
+    val mock: Boolean = false,
+)
+
 // ---------------- 售后 / 评价 ----------------
 
 /** 售后申请请求体。 */

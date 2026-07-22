@@ -45,6 +45,8 @@ import com.example.hytp.core.network.dto.PageData
 import com.example.hytp.core.network.dto.PayConfirmResult
 import com.example.hytp.core.network.dto.PayRequest
 import com.example.hytp.core.network.dto.PayResult
+import com.example.hytp.core.network.dto.RechargeRequest
+import com.example.hytp.core.network.dto.RechargeResult
 import com.example.hytp.core.network.dto.ProductDetail
 import com.example.hytp.core.network.dto.ProductListItem
 import com.example.hytp.core.network.dto.RefreshRequest
@@ -303,6 +305,10 @@ interface HytpApiService {
 
     @POST("pay/mock/confirm")
     suspend fun mockConfirmPay(@Body body: MockConfirmRequest): ApiResponse<PayConfirmResult>
+
+    // 同袍币充值（Mock）
+    @POST("wallet/recharge")
+    suspend fun recharge(@Body body: RechargeRequest): ApiResponse<RechargeResult>
 
     // 文件上传
     @Multipart

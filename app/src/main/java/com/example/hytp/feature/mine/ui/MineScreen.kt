@@ -42,12 +42,23 @@ import com.example.hytp.ui.theme.Spacing
 fun MineScreen(
     onLoggedOut: () -> Unit,
     onOpenOrders: () -> Unit,
+    onOpenRecharge: () -> Unit = {},
+    refreshSignal: Int? = null,
+    onRefreshConsumed: () -> Unit = {},
     viewModel: MineViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
 
     LaunchedEffect(state.loggedOut, state.sessionExpired) {
         if (state.loggedOut || state.sessionExpired) onLoggedOut()
+    }
+
+    // 充值成功返回：刷新余额
+    LaunchedEffect(refreshSignal) {
+        if (refreshSignal != null) {
+            viewModel.loadProfile()
+            onRefreshConsumed()
+        }
     }
 
     when {
@@ -102,11 +113,20 @@ fun MineScreen(
                             style = MaterialTheme.typography.titleLarge,
                         )
                         Spacer(Modifier.height(Spacing.xs))
-                        Text(
-                            text = "余额 ${p.balance} ¥",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.tertiary,
-                        )
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                text = "${toCoin(p.balance)} 同袍币",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.tertiary,
+                            )
+                            Spacer(Modifier.width(Spacing.sm))
+                            HanfuButton(
+                                text = "充值",
+                                onClick = onOpenRecharge,
+                                variant = HanfuButtonVariant.Outline,
+                                size = HanfuButtonSize.Small,
+                            )
+                        }
                         Spacer(Modifier.height(Spacing.xs))
                         DynastyTag(
                             text = if (p.memberLevel == 1) "高级会员" else "普通用户",
@@ -151,6 +171,10 @@ fun MineScreen(
         }
     }
 }
+
+/** 元字符串 → 同袍币整数（100 同袍币 = 1 元）。 */
+private fun toCoin(yuan: String): Int =
+    ((yuan.toDoubleOrNull() ?: 0.0) * 100).toLong().toInt()
 
 @Composable
 private fun OrderEntry(label: String, onClick: () -> Unit) {

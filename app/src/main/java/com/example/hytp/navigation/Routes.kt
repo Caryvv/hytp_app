@@ -23,6 +23,7 @@ object Routes {
     const val ADDRESS = "address"
     const val ORDER_LIST = "orders"
     const val ORDER_DETAIL = "order/{orderNo}"
+    const val RECHARGE = "recharge"
     const val REVIEW = "review/{orderNo}/{productId}"
 
     fun orderDetail(orderNo: String): String = "order/$orderNo"
