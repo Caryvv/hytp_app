@@ -97,7 +97,7 @@ fun MainScreen(
         ) { tab ->
             when (tab) {
                 BottomTab.Home -> HomeNavHost(
-                    homeNavController, contentModifier, socialNavController, mallNavController,
+                    homeNavController, contentModifier, socialNavController, mallNavController, mineNavController,
                 ) { currentTab = it }
 
                 BottomTab.Social -> SocialNavHost(
@@ -124,6 +124,7 @@ private fun HomeNavHost(
     modifier: Modifier,
     socialNavController: androidx.navigation.NavHostController,
     mallNavController: androidx.navigation.NavHostController,
+    mineNavController: androidx.navigation.NavHostController,
     onSwitchTab: (BottomTab) -> Unit,
 ) {
     NavHost(
@@ -143,6 +144,12 @@ private fun HomeNavHost(
                     onSwitchTab(BottomTab.Social)
                     socialNavController.navigate(TabRoutes.SOCIAL_ROOT) {
                         popUpTo(TabRoutes.SOCIAL_ROOT) { inclusive = true }
+                    }
+                },
+                onOpenMessages = {
+                    onSwitchTab(BottomTab.Mine)
+                    mineNavController.navigate(Routes.MESSAGE_CENTER) {
+                        popUpTo(TabRoutes.MINE_ROOT) { inclusive = true }
                     }
                 },
             )

@@ -1,5 +1,6 @@
 package com.example.hytp.feature.home.ui
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -12,8 +13,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -21,178 +26,311 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import coil.compose.AsyncImage
+import com.example.hytp.core.network.dto.BannerItem
 import com.example.hytp.core.ui.DynastyTag
-import com.example.hytp.core.ui.HanfuButton
-import com.example.hytp.core.ui.HanfuButtonSize
-import com.example.hytp.core.ui.HanfuButtonVariant
 import com.example.hytp.core.ui.HomeSearchBar
 import com.example.hytp.core.ui.SectionTitle
 import com.example.hytp.core.ui.TagSemantic
 import com.example.hytp.feature.home.vm.HomeViewModel
+import com.example.hytp.feature.social.ui.FeedCard
 import com.example.hytp.ui.theme.Spacing
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
-/**
- * 首页 Tab 内容（docs/dev/15 §7.3）。
- * 结构：搜索栏 + 欢迎 + Banner 占位 + 功能导航 5 入口 + 推荐流占位。
- */
 @Composable
 fun HomeScreen(
     onOpenMall: () -> Unit,
     onOpenSocial: () -> Unit,
+    onOpenMessages: () -> Unit = {},
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val listState = rememberLazyListState()
+
+    // 检测滚动到底部触发 loadMore
+    val shouldLoadMore by remember {
+        derivedStateOf {
+            val last = listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
+            last >= listState.layoutInfo.totalItemsCount - 3
+        }
+    }
+    LaunchedEffect(shouldLoadMore, state.feedHasMore, state.feedLoadingMore) {
+        if (shouldLoadMore && state.feedHasMore && !state.feedLoadingMore && state.feedItems.isNotEmpty()) {
+            viewModel.loadMore()
+        }
+    }
 
     Surface(
         modifier = Modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background,
     ) {
         when {
-            state.loading ->
+            state.loading && state.profile == null ->
                 Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     CircularProgressIndicator()
                 }
 
-            state.error != null ->
+            state.error != null && state.profile == null ->
                 Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(state.error!!, color = MaterialTheme.colorScheme.error)
-                        Spacer(Modifier.height(Spacing.lg))
-                        HanfuButton(
-                            text = "重试",
-                            onClick = { viewModel.loadProfile() },
-                            variant = HanfuButtonVariant.Outline,
-                            size = HanfuButtonSize.Small,
-                        )
-                    }
+                    Text(state.error!!, color = MaterialTheme.colorScheme.error)
                 }
 
-            state.profile != null -> {
-                val p = state.profile!!
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .verticalScroll(rememberScrollState())
-                        .padding(horizontal = Spacing.lg),
+            else -> {
+                LazyColumn(
+                    state = listState,
+                    modifier = Modifier.fillMaxSize().padding(horizontal = Spacing.lg),
                 ) {
-                    Spacer(Modifier.height(Spacing.md))
-
-                    // ── 搜索栏 ──
-                    HomeSearchBar(onClick = { /* TODO: 搜索页 */ })
-
-                    Spacer(Modifier.height(Spacing.lg))
-
-                    // ── 欢迎 ──
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(
-                            text = "欢迎，${p.nickname}",
-                            style = MaterialTheme.typography.headlineSmall,
-                        )
-                        Spacer(Modifier.width(Spacing.sm))
-                        DynastyTag(
-                            text = if (p.memberLevel == 1) "高级会员" else "普通用户",
-                            semantic = if (p.memberLevel == 1) TagSemantic.Member else TagSemantic.Info,
-                        )
-                    }
-                    Spacer(Modifier.height(Spacing.xs))
-                    Text(
-                        text = "同袍币：${((p.balance.toDoubleOrNull() ?: 0.0) * 100).toLong()}",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.tertiary,
-                    )
-
-                    Spacer(Modifier.height(Spacing.lg))
-
-                    // ── Banner 占位 ──
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(140.dp),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        Surface(
-                            shape = MaterialTheme.shapes.extraLarge,
-                            color = MaterialTheme.colorScheme.primaryContainer,
-                            modifier = Modifier.fillMaxSize(),
-                        ) {
-                            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                                Text(
-                                    text = "国风雅韵 · 汉服之美",
-                                    style = MaterialTheme.typography.headlineSmall,
-                                    color = MaterialTheme.colorScheme.onPrimaryContainer,
-                                )
+                    // ── 顶栏：搜索 + 铃铛 ──
+                    item(key = "top_bar") {
+                        Spacer(Modifier.height(Spacing.md))
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Box(modifier = Modifier.weight(1f)) {
+                                HomeSearchBar(onClick = { /* TODO: 搜索页 */ })
+                            }
+                            Spacer(Modifier.width(Spacing.md))
+                            Box(
+                                modifier = Modifier
+                                    .size(40.dp)
+                                    .clickable { onOpenMessages() },
+                                contentAlignment = Alignment.Center,
+                            ) {
+                                Text("🔔", style = MaterialTheme.typography.titleLarge)
+                                if (state.unreadCount > 0) {
+                                    Box(
+                                        modifier = Modifier
+                                            .align(Alignment.TopEnd)
+                                            .size(16.dp)
+                                            .clip(CircleShape)
+                                            .background(MaterialTheme.colorScheme.tertiary),
+                                        contentAlignment = Alignment.Center,
+                                    ) {
+                                        Text(
+                                            text = if (state.unreadCount > 9) "9+" else state.unreadCount.toString(),
+                                            style = MaterialTheme.typography.labelSmall,
+                                            color = MaterialTheme.colorScheme.onTertiary,
+                                        )
+                                    }
+                                }
                             }
                         }
                     }
 
-                    Spacer(Modifier.height(Spacing.xl))
+                    // ── 欢迎行 ──
+                    val p = state.profile
+                    if (p != null) {
+                        item(key = "welcome") {
+                            Spacer(Modifier.height(Spacing.md))
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text(
+                                    text = "欢迎，${p.nickname}",
+                                    style = MaterialTheme.typography.headlineSmall,
+                                )
+                                Spacer(Modifier.width(Spacing.sm))
+                                DynastyTag(
+                                    text = if (p.memberLevel == 1) "高级会员" else "普通用户",
+                                    semantic = if (p.memberLevel == 1) TagSemantic.Member else TagSemantic.Info,
+                                )
+                            }
+                            Spacer(Modifier.height(Spacing.xs))
+                            Text(
+                                text = "同袍币：${((p.balance.toDoubleOrNull() ?: 0.0) * 100).toLong()}",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.tertiary,
+                            )
+                        }
+                    }
+
+                    // ── Banner 轮播 ──
+                    if (state.banners.isNotEmpty()) {
+                        item(key = "banner") {
+                            Spacer(Modifier.height(Spacing.lg))
+                            BannerCarousel(banners = state.banners)
+                        }
+                    }
 
                     // ── 功能导航 5 入口 ──
-                    SectionTitle("探索")
-                    Spacer(Modifier.height(Spacing.md))
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceEvenly,
-                    ) {
-                        HomeEntry(
-                            emoji = "🎓",
-                            label = "萌新入门",
-                            onClick = { /* TODO: beginner */ },
-                        )
-                        HomeEntry(
-                            emoji = "👥",
-                            label = "同袍社交",
-                            onClick = onOpenSocial,
-                        )
-                        HomeEntry(
-                            emoji = "🏪",
-                            label = "汉服商城",
-                            onClick = onOpenMall,
-                        )
-                        HomeEntry(
-                            emoji = "🏯",
-                            label = "文旅服务",
-                            onClick = { /* TODO: travel */ },
-                        )
-                        HomeEntry(
-                            emoji = "📖",
-                            label = "文化传承",
-                            onClick = { /* TODO: culture */ },
-                        )
+                    item(key = "nav_entries") {
+                        Spacer(Modifier.height(Spacing.xl))
+                        SectionTitle("探索")
+                        Spacer(Modifier.height(Spacing.md))
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceEvenly,
+                        ) {
+                            HomeEntry("🎓", "萌新入门", onClick = { /* TODO: beginner */ })
+                            HomeEntry("👥", "同袍社交", onClick = onOpenSocial)
+                            HomeEntry("🏪", "汉服商城", onClick = onOpenMall)
+                            HomeEntry("🏯", "文旅服务", onClick = { /* TODO: travel */ })
+                            HomeEntry("📖", "文化传承", onClick = { /* TODO: culture */ })
+                        }
                     }
 
-                    Spacer(Modifier.height(Spacing.xl))
-                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-                    Spacer(Modifier.height(Spacing.lg))
-
-                    // ── 推荐流占位 ──
-                    SectionTitle("为你推荐")
-                    Spacer(Modifier.height(Spacing.md))
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(120.dp),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        Text(
-                            text = "个性化推荐即将上线",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
+                    // ── 推荐流标题 ──
+                    item(key = "feed_section_title") {
+                        Spacer(Modifier.height(Spacing.lg))
+                        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                        Spacer(Modifier.height(Spacing.lg))
+                        SectionTitle("为你推荐")
                     }
 
-                    Spacer(Modifier.height(Spacing.xxl))
+                    // ── 推荐流 ──
+                    when {
+                        state.feedLoading && state.feedItems.isEmpty() ->
+                            item(key = "feed_loading") {
+                                Box(
+                                    Modifier.fillMaxWidth().height(120.dp),
+                                    contentAlignment = Alignment.Center,
+                                ) { CircularProgressIndicator() }
+                            }
+
+                        state.feedError != null && state.feedItems.isEmpty() ->
+                            item(key = "feed_error") {
+                                Box(
+                                    Modifier.fillMaxWidth().height(120.dp),
+                                    contentAlignment = Alignment.Center,
+                                ) {
+                                    Text(
+                                        state.feedError!!,
+                                        color = MaterialTheme.colorScheme.error,
+                                    )
+                                }
+                            }
+
+                        state.feedItems.isEmpty() ->
+                            item(key = "feed_empty") {
+                                Box(
+                                    Modifier.fillMaxWidth().height(120.dp),
+                                    contentAlignment = Alignment.Center,
+                                ) {
+                                    Text(
+                                        "暂无推荐内容",
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    )
+                                }
+                            }
+
+                        else -> {
+                            items(state.feedItems, key = { "feed_${it.id}" }) { feed ->
+                                FeedCard(
+                                    feed = feed,
+                                    onClick = { /* TODO: 从首页进详情需跨 tab 导航 */ },
+                                    onAuthorClick = { /* TODO: 进主页 */ },
+                                    onLike = { },
+                                    onFavorite = { },
+                                )
+                            }
+                            if (state.feedLoadingMore) {
+                                item(key = "feed_load_more") {
+                                    Box(
+                                        Modifier.fillMaxWidth().height(48.dp),
+                                        contentAlignment = Alignment.Center,
+                                    ) {
+                                        CircularProgressIndicator(modifier = Modifier.size(24.dp))
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    // 底部留白
+                    item(key = "bottom_spacer") {
+                        Spacer(Modifier.height(Spacing.xxl))
+                    }
                 }
             }
         }
     }
 }
+
+// ── Banner 轮播 ──
+
+@Composable
+private fun BannerCarousel(banners: List<BannerItem>) {
+    val scope = rememberCoroutineScope()
+    // 用 Int.MAX_VALUE / 2 作为起始偏移，模拟无限循环
+    val itemCount = if (banners.size > 1) Int.MAX_VALUE else 1
+    val pagerState = rememberPagerState(initialPage = if (banners.size > 1) itemCount / 2 else 0) {
+        itemCount
+    }
+
+    // 自动翻页（4s）
+    if (banners.size > 1) {
+        LaunchedEffect(Unit) {
+            while (true) {
+                delay(4000)
+                scope.launch {
+                    pagerState.animateScrollToPage(pagerState.currentPage + 1)
+                }
+            }
+        }
+    }
+
+    Column {
+        HorizontalPager(
+            state = pagerState,
+            modifier = Modifier.fillMaxWidth().height(140.dp),
+        ) { page ->
+            val realIdx = page % banners.size
+            val banner = banners[realIdx]
+            Surface(
+                shape = MaterialTheme.shapes.extraLarge,
+                color = MaterialTheme.colorScheme.primaryContainer,
+                modifier = Modifier.fillMaxSize().padding(horizontal = 4.dp),
+            ) {
+                Box(Modifier.fillMaxSize()) {
+                    AsyncImage(
+                        model = banner.imageUrl,
+                        contentDescription = banner.title,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize(),
+                    )
+                    Text(
+                        text = banner.title,
+                        style = MaterialTheme.typography.headlineSmall,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                        modifier = Modifier.align(Alignment.Center),
+                    )
+                }
+            }
+        }
+
+        if (banners.size > 1) {
+            Spacer(Modifier.height(Spacing.sm))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center,
+            ) {
+                repeat(banners.size) { idx ->
+                    val isActive = pagerState.currentPage % banners.size == idx
+                    Box(
+                        modifier = Modifier
+                            .padding(horizontal = 3.dp)
+                            .size(if (isActive) 8.dp else 6.dp)
+                            .clip(CircleShape)
+                            .background(
+                                if (isActive) MaterialTheme.colorScheme.primary
+                                else MaterialTheme.colorScheme.outlineVariant,
+                            ),
+                    )
+                }
+            }
+        }
+    }
+}
+
+// ── 功能入口 ──
 
 @Composable
 private fun HomeEntry(

@@ -6,6 +6,7 @@ import com.example.hytp.core.data.AuthRepository
 import com.example.hytp.core.data.CartRepository
 import com.example.hytp.core.data.ChatRepository
 import com.example.hytp.core.data.GroupRepository
+import com.example.hytp.core.data.HomeRepository
 import com.example.hytp.core.data.OrderRepository
 import com.example.hytp.core.data.PaymentRepository
 import com.example.hytp.core.data.ShopRepository
@@ -106,4 +107,10 @@ object DataModule {
         api: HytpApiService,
         @ApplicationContext context: Context,
     ): UploadRepository = UploadRepository(api, context)
+
+    @Provides
+    @Singleton
+    fun provideHomeRepository(
+        api: HytpApiService,
+    ): HomeRepository = HomeRepository(api)
 }

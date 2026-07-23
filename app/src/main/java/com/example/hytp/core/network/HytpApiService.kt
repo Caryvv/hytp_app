@@ -1,5 +1,6 @@
 package com.example.hytp.core.network
 
+import com.example.hytp.core.network.dto.BannerItem
 import com.example.hytp.core.network.dto.AddCartRequest
 import com.example.hytp.core.network.dto.Address
 import com.example.hytp.core.network.dto.AddressList
@@ -338,4 +339,11 @@ interface HytpApiService {
     @Multipart
     @POST("upload")
     suspend fun uploadFile(@retrofit2.http.Part file: MultipartBody.Part): ApiResponse<UploadResult>
+
+    // 首页
+    @GET("home/banners")
+    suspend fun getBanners(): ApiResponse<List<BannerItem>>
+
+    @GET("home/feed")
+    suspend fun getHomeFeed(@QueryMap query: Map<String, String>): ApiResponse<PageData<Feed>>
 }
