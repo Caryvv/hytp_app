@@ -34,6 +34,8 @@ import com.example.hytp.core.network.dto.RentOrderRequest
 import com.example.hytp.core.network.dto.RentOrderResult
 import com.example.hytp.core.network.dto.ShareResult
 import com.example.hytp.core.network.dto.SocialProfile
+import com.example.hytp.core.network.dto.TipRequest
+import com.example.hytp.core.network.dto.TipResult
 import com.example.hytp.core.network.dto.LoginRequest
 import com.example.hytp.core.network.dto.LoginResponse
 import com.example.hytp.core.network.dto.LogoutRequest
@@ -239,6 +241,14 @@ interface HytpApiService {
 
     @POST("feeds/{id}/share")
     suspend fun shareFeed(@Path("id") id: Long): ApiResponse<ShareResult>
+
+    /** 打赏动态，Idempotency-Key 头防重复扣款（客户端生成 UUID）。 */
+    @POST("feeds/{id}/tip")
+    suspend fun tipFeed(
+        @Path("id") id: Long,
+        @Header("Idempotency-Key") idempotencyKey: String,
+        @Body body: TipRequest,
+    ): ApiResponse<TipResult>
 
     @GET("feeds/{id}/comments")
     suspend fun getFeedComments(

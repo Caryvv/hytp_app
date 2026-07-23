@@ -33,6 +33,8 @@ data class Feed(
     val commentCount: Int = 0,
     val favoriteCount: Int = 0,
     val shareCount: Int = 0,
+    val tipCount: Int = 0,
+    val tipCoin: Int = 0,
     val status: Int = 1,
     val createdAt: Long = 0,
     val author: SocialProfile? = null,
@@ -67,8 +69,17 @@ data class AddCommentRequest(
     val parentId: Long? = null,
 )
 
+/** 打赏请求体。 */
+data class TipRequest(val coin: Int)
+
 // 互动响应
 data class LikeResult(val liked: Boolean = false, val likeCount: Int = 0)
 data class FavoriteResult(val favorited: Boolean = false, val favoriteCount: Int = 0)
 data class ShareResult(val shareCount: Int = 0)
 data class FollowResult(val followed: Boolean = false, val followerCount: Int = 0)
+data class TipResult(
+    val coin: Int = 0,
+    val balanceCoin: Int = 0,
+    val feedTipCount: Int = 0,
+    val feedTipCoin: Int = 0,
+)

@@ -12,6 +12,8 @@ import com.example.hytp.core.network.dto.PageData
 import com.example.hytp.core.network.dto.PublishFeedRequest
 import com.example.hytp.core.network.dto.ShareResult
 import com.example.hytp.core.network.dto.SocialProfile
+import com.example.hytp.core.network.dto.TipRequest
+import com.example.hytp.core.network.dto.TipResult
 import com.example.hytp.core.network.safeApiCall
 
 /**
@@ -42,6 +44,10 @@ class SocialRepository(
     suspend fun favorite(id: Long): ApiResult<FavoriteResult> = safeApiCall { api.favoriteFeed(id) }
     suspend fun unfavorite(id: Long): ApiResult<FavoriteResult> = safeApiCall { api.unfavoriteFeed(id) }
     suspend fun share(id: Long): ApiResult<ShareResult> = safeApiCall { api.shareFeed(id) }
+
+    /** 打赏动态，UUID 作幂等键防重复扣款（仿 createOrder）。 */
+    suspend fun tip(id: Long, coin: Int): ApiResult<TipResult> =
+        safeApiCall { api.tipFeed(id, java.util.UUID.randomUUID().toString(), TipRequest(coin)) }
 
     suspend fun getComments(id: Long, page: Int = 1, pageSize: Int = 20): ApiResult<PageData<FeedComment>> =
         safeApiCall { api.getFeedComments(id, page, pageSize) }

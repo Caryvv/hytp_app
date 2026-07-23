@@ -13,13 +13,17 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -62,6 +66,15 @@ fun FeedDetailScreen(
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbar = remember { SnackbarHostState() }
     var comment by remember { mutableStateOf("") }
+    var showTipDialog by remember { mutableStateOf(false) }
+
+    if (showTipDialog) {
+        TipDialog(
+            submitting = state.submitting,
+            onDismiss = { showTipDialog = false },
+            onTip = { coin -> showTipDialog = false; viewModel.tip(coin) },
+        )
+    }
 
     LaunchedEffect(state.deleted) { if (state.deleted) onBack() }
     LaunchedEffect(state.message) {
@@ -121,9 +134,11 @@ fun FeedDetailScreen(
                     DetailContent(
                         feed = state.feed!!,
                         comments = state.comments,
+                        isOwner = viewModel.isOwner,
                         onAuthorClick = onAuthorClick,
                         onLike = { viewModel.toggleLike() },
                         onFavorite = { viewModel.toggleFavorite() },
+                        onTip = { showTipDialog = true },
                     )
             }
         }
@@ -134,9 +149,11 @@ fun FeedDetailScreen(
 private fun DetailContent(
     feed: Feed,
     comments: List<FeedComment>,
+    isOwner: Boolean,
     onAuthorClick: (Long) -> Unit,
     onLike: () -> Unit,
     onFavorite: () -> Unit,
+    onTip: () -> Unit,
 ) {
     LazyColumn(Modifier.fillMaxSize()) {
         item {
@@ -184,6 +201,15 @@ private fun DetailContent(
                     modifier = Modifier.clickable { onFavorite() },
                 )
                 Text("↗ ${feed.shareCount}", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                if (!isOwner) {
+                    Text(
+                        "🎁 ${feed.tipCount}",
+                        color = MaterialTheme.colorScheme.tertiary,
+                        modifier = Modifier.clickable { onTip() },
+                    )
+                } else if (feed.tipCount > 0) {
+                    Text("🎁 ${feed.tipCount}", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
             }
             HorizontalDivider()
             Text("评论（${feed.commentCount}）", style = MaterialTheme.typography.titleSmall, modifier = Modifier.padding(16.dp))
@@ -193,6 +219,41 @@ private fun DetailContent(
         }
         item { Spacer(Modifier.height(24.dp)) }
     }
+}
+
+/** 打赏档位弹窗：预设 [6,18,66,88,168] 同袍币。 */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun TipDialog(
+    submitting: Boolean,
+    onDismiss: () -> Unit,
+    onTip: (Int) -> Unit,
+) {
+    val tiers = listOf(6, 18, 66, 88, 168)
+    var selected by remember { mutableStateOf(tiers[1]) }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("打赏同袍币") },
+        text = {
+            Column {
+                Text("100 同袍币 = 1 元", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Spacer(Modifier.height(12.dp))
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    tiers.forEach { coin ->
+                        FilterChip(
+                            selected = selected == coin,
+                            onClick = { selected = coin },
+                            label = { Text("$coin") },
+                        )
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = { onTip(selected) }, enabled = !submitting) { Text("打赏 $selected") }
+        },
+        dismissButton = { TextButton(onClick = onDismiss) { Text("取消") } },
+    )
 }
 
 @Composable

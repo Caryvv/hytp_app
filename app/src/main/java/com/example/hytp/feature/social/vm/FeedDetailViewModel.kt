@@ -120,6 +120,26 @@ class FeedDetailViewModel @Inject constructor(
         }
     }
 
+    /** 打赏 coin 同袍币给作者；成功用 TipResult 更新该 feed 打赏计数。 */
+    fun tip(coin: Int) {
+        val feed = _uiState.value.feed ?: return
+        if (_uiState.value.submitting) return
+        _uiState.update { it.copy(submitting = true) }
+        viewModelScope.launch {
+            when (val r = socialRepository.tip(feed.id, coin)) {
+                is ApiResult.Success -> _uiState.update { s ->
+                    s.copy(
+                        submitting = false,
+                        message = "打赏成功 -${r.data.coin} 同袍币",
+                        feed = s.feed?.copy(tipCount = r.data.feedTipCount, tipCoin = r.data.feedTipCoin),
+                    )
+                }
+                is ApiResult.Error -> _uiState.update { it.copy(submitting = false, message = r.message) }
+                is ApiResult.Failure -> _uiState.update { it.copy(submitting = false, message = "网络异常，请重试") }
+            }
+        }
+    }
+
     fun deleteFeed() {
         viewModelScope.launch {
             when (socialRepository.deleteFeed(feedId)) {
