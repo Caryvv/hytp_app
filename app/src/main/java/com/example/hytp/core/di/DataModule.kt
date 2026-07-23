@@ -10,6 +10,7 @@ import com.example.hytp.core.data.OrderRepository
 import com.example.hytp.core.data.PaymentRepository
 import com.example.hytp.core.data.ShopRepository
 import com.example.hytp.core.data.SocialRepository
+import com.example.hytp.core.data.TaskRepository
 import com.example.hytp.core.data.TokenStore
 import com.example.hytp.core.data.UploadRepository
 import com.example.hytp.core.data.UserSessionManager
@@ -80,6 +81,12 @@ object DataModule {
     fun provideSocialRepository(
         api: HytpApiService,
     ): SocialRepository = SocialRepository(api)
+
+    @Provides
+    @Singleton
+    fun provideTaskRepository(
+        api: HytpApiService,
+    ): TaskRepository = TaskRepository(api)
 
     @Provides
     @Singleton

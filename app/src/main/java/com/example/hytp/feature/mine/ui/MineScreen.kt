@@ -43,6 +43,7 @@ fun MineScreen(
     onLoggedOut: () -> Unit,
     onOpenOrders: () -> Unit,
     onOpenRecharge: () -> Unit = {},
+    onOpenTasks: () -> Unit = {},
     refreshSignal: Int? = null,
     onRefreshConsumed: () -> Unit = {},
     viewModel: MineViewModel = hiltViewModel(),
@@ -153,6 +154,7 @@ fun MineScreen(
                 Spacer(Modifier.height(Spacing.sm))
 
                 // ── 功能列表 ──
+                MineListItem("🎯", "任务中心", onClick = onOpenTasks)
                 MineListItem("❤", "我的收藏")
                 MineListItem("👥", "我的关注")
                 MineListItem("🔔", "消息中心")
@@ -209,11 +211,11 @@ private fun OrderEntry(label: String, onClick: () -> Unit) {
 }
 
 @Composable
-private fun MineListItem(icon: String, label: String) {
+private fun MineListItem(icon: String, label: String, onClick: () -> Unit = {}) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { /* TODO: 各详情页 */ }
+            .clickable(onClick = onClick)
             .padding(vertical = Spacing.md, horizontal = Spacing.xs),
         verticalAlignment = Alignment.CenterVertically,
     ) {
