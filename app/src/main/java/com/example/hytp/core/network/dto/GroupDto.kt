@@ -18,6 +18,7 @@ data class SocialGroup(
     val createdAt: Long = 0,
     val isJoined: Boolean = false,
     val myRole: Int? = null, // 0成员 1管理 2群主
+    val unread: Int = 0, // 仅 /groups/mine 返回，其它接口默认 0
 )
 
 /** 群成员（SocialProfile + role）。用宽松结构：复用 SocialProfile 字段 + role。 */

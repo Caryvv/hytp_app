@@ -291,6 +291,10 @@ interface HytpApiService {
     @GET("groups")
     suspend fun getGroups(@QueryMap query: Map<String, String>): ApiResponse<PageData<SocialGroup>>
 
+    /** 我加入的社群（附未读，用于消息中心）。 */
+    @GET("groups/mine")
+    suspend fun getMyGroups(@QueryMap query: Map<String, String>): ApiResponse<PageData<SocialGroup>>
+
     @POST("groups")
     suspend fun createGroup(@Body body: CreateGroupRequest): ApiResponse<SocialGroup>
 

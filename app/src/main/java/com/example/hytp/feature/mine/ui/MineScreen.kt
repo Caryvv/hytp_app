@@ -44,6 +44,7 @@ fun MineScreen(
     onOpenOrders: () -> Unit,
     onOpenRecharge: () -> Unit = {},
     onOpenTasks: () -> Unit = {},
+    onOpenMessages: () -> Unit = {},
     refreshSignal: Int? = null,
     onRefreshConsumed: () -> Unit = {},
     viewModel: MineViewModel = hiltViewModel(),
@@ -157,7 +158,7 @@ fun MineScreen(
                 MineListItem("🎯", "任务中心", onClick = onOpenTasks)
                 MineListItem("❤", "我的收藏")
                 MineListItem("👥", "我的关注")
-                MineListItem("🔔", "消息中心")
+                MineListItem("🔔", "消息中心", onClick = onOpenMessages)
                 MineListItem("⚙", "设置")
 
                 Spacer(Modifier.weight(1f))

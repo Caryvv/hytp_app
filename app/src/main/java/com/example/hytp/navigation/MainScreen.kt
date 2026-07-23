@@ -26,6 +26,7 @@ import com.example.hytp.feature.chat.ui.ConversationListScreen
 import com.example.hytp.feature.group.ui.GroupChatScreen
 import com.example.hytp.feature.group.ui.GroupListScreen
 import com.example.hytp.feature.home.ui.HomeScreen
+import com.example.hytp.feature.message.ui.MessageCenterScreen
 import com.example.hytp.feature.mine.ui.MineScreen
 import com.example.hytp.feature.mine.ui.TaskScreen
 import com.example.hytp.feature.mine.ui.RechargeScreen
@@ -348,6 +349,7 @@ private fun MineNavHost(
                 onOpenOrders = { navController.navigate(Routes.ORDER_LIST) },
                 onOpenRecharge = { navController.navigate(Routes.RECHARGE) },
                 onOpenTasks = { navController.navigate(Routes.TASKS) },
+                onOpenMessages = { navController.navigate(Routes.MESSAGE_CENTER) },
                 refreshSignal = rechargedCoin.value,
                 onRefreshConsumed = { entry.savedStateHandle["recharged_coin"] = null },
             )
@@ -400,6 +402,30 @@ private fun MineNavHost(
                 onBack = { navController.popBackStack() },
                 onDone = { navController.popBackStack() },
             )
+        }
+        // ── 消息中心（私信 + 社群聚合） ──
+        composable(Routes.MESSAGE_CENTER) {
+            MessageCenterScreen(
+                onBack = { navController.popBackStack() },
+                onConversationClick = { convId, nickname ->
+                    navController.navigate(Routes.chat(convId))
+                    navController.getBackStackEntry(Routes.CHAT).savedStateHandle["chatTitle"] = nickname
+                },
+                onGroupClick = { id -> navController.navigate(Routes.groupChat(id)) },
+            )
+        }
+        composable(
+            route = Routes.CHAT,
+            arguments = listOf(navArgument("id") { type = NavType.StringType }),
+        ) { entry ->
+            val title = entry.savedStateHandle.get<String>("chatTitle") ?: "私信"
+            ChatScreen(title = title, onBack = { navController.popBackStack() })
+        }
+        composable(
+            route = Routes.GROUP_CHAT,
+            arguments = listOf(navArgument("id") { type = NavType.StringType }),
+        ) {
+            GroupChatScreen(onBack = { navController.popBackStack() })
         }
     }
 }

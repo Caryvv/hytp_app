@@ -30,6 +30,10 @@ class GroupRepository(
     suspend fun create(body: CreateGroupRequest): ApiResult<SocialGroup> =
         safeApiCall { api.createGroup(body) }
 
+    /** 我加入的社群（附未读，用于消息中心）。 */
+    suspend fun myGroups(page: Int = 1, pageSize: Int = 20): ApiResult<PageData<SocialGroup>> =
+        safeApiCall { api.getMyGroups(buildMap { put("page", page.toString()); put("pageSize", pageSize.toString()) }) }
+
     suspend fun detail(id: Long): ApiResult<SocialGroup> =
         safeApiCall { api.getGroupDetail(id) }
 
