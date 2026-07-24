@@ -53,39 +53,45 @@ class HomeViewModel @Inject constructor(
 
     private fun loadAll() {
         _uiState.update { it.copy(loading = true, error = null) }
-        viewModelScope.launch { loadProfile() }
-        viewModelScope.launch { loadBanners() }
-        viewModelScope.launch { loadFeed(page = 1) }
-    }
-
-    fun loadProfile() {
         viewModelScope.launch {
-            when (val result = authRepository.getProfile()) {
-                is ApiResult.Success ->
-                    _uiState.update { it.copy(loading = false, profile = result.data) }
-                is ApiResult.Error ->
-                    if (result.code == BizCode.UNAUTHORIZED) {
-                        _uiState.update { it.copy(loading = false, sessionExpired = true) }
-                    } else {
-                        _uiState.update { it.copy(loading = false, error = result.message) }
-                    }
-                is ApiResult.Failure ->
-                    _uiState.update { it.copy(loading = false, error = "网络异常，请重试") }
+            // 三个请求并行
+            val profileJob = launch { loadProfile() }
+            val bannersJob = launch { loadBanners() }
+            val feedJob = launch { loadFeed(page = 1) }
+            profileJob.join()
+            bannersJob.join()
+            feedJob.join()
+            // 全部完成后取消 loading（仅当没有全局 error 时）
+            if (_uiState.value.error == null) {
+                _uiState.update { it.copy(loading = false) }
             }
         }
     }
 
-    fun loadBanners() {
-        viewModelScope.launch {
-            when (val r = homeRepository.getBanners()) {
-                is ApiResult.Success ->
-                    _uiState.update { it.copy(banners = r.data) }
-                else -> { /* banner 失败不阻塞整个页面 */ }
-            }
+    private suspend fun loadProfile() {
+        when (val result = authRepository.getProfile()) {
+            is ApiResult.Success ->
+                _uiState.update { it.copy(profile = result.data) }
+            is ApiResult.Error ->
+                if (result.code == BizCode.UNAUTHORIZED) {
+                    _uiState.update { it.copy(sessionExpired = true) }
+                } else {
+                    _uiState.update { it.copy(error = result.message) }
+                }
+            is ApiResult.Failure ->
+                _uiState.update { it.copy(error = "网络异常，请重试") }
         }
     }
 
-    private fun loadFeed(page: Int) {
+    private suspend fun loadBanners() {
+        when (val r = homeRepository.getBanners()) {
+            is ApiResult.Success ->
+                _uiState.update { it.copy(banners = r.data) }
+            else -> { /* banner 失败不阻塞整个页面 */ }
+        }
+    }
+
+    private suspend fun loadFeed(page: Int) {
         val s = _uiState.value
         if (s.feedLoading || s.feedLoadingMore) return
         if (page == 1) {
@@ -93,31 +99,29 @@ class HomeViewModel @Inject constructor(
         } else {
             _uiState.update { it.copy(feedLoadingMore = true) }
         }
-        viewModelScope.launch {
-            when (val r = homeRepository.getHomeFeed(page, pageSize)) {
-                is ApiResult.Success -> {
-                    val d = r.data
-                    val merged = if (page == 1) d.list else s.feedItems + d.list
-                    _uiState.update {
-                        it.copy(
-                            feedLoading = false,
-                            feedLoadingMore = false,
-                            refreshing = false,
-                            feedItems = merged,
-                            feedPage = page,
-                            feedHasMore = merged.size < d.pagination.total && d.list.isNotEmpty(),
-                        )
-                    }
+        when (val r = homeRepository.getHomeFeed(page, pageSize)) {
+            is ApiResult.Success -> {
+                val d = r.data
+                val merged = if (page == 1) d.list else s.feedItems + d.list
+                _uiState.update {
+                    it.copy(
+                        feedLoading = false,
+                        feedLoadingMore = false,
+                        refreshing = false,
+                        feedItems = merged,
+                        feedPage = page,
+                        feedHasMore = merged.size < d.pagination.total && d.list.isNotEmpty(),
+                    )
                 }
-                is ApiResult.Error -> {
-                    _uiState.update {
-                        it.copy(feedLoading = false, feedLoadingMore = false, refreshing = false, feedError = r.message)
-                    }
+            }
+            is ApiResult.Error -> {
+                _uiState.update {
+                    it.copy(feedLoading = false, feedLoadingMore = false, refreshing = false, feedError = r.message)
                 }
-                is ApiResult.Failure -> {
-                    _uiState.update {
-                        it.copy(feedLoading = false, feedLoadingMore = false, refreshing = false, feedError = "网络异常，请重试")
-                    }
+            }
+            is ApiResult.Failure -> {
+                _uiState.update {
+                    it.copy(feedLoading = false, feedLoadingMore = false, refreshing = false, feedError = "网络异常，请重试")
                 }
             }
         }
@@ -125,15 +129,17 @@ class HomeViewModel @Inject constructor(
 
     fun refresh() {
         _uiState.update { it.copy(refreshing = true, feedPage = 1, feedHasMore = true) }
-        viewModelScope.launch { loadFeed(page = 1) }
-        viewModelScope.launch { loadBanners() }
-        viewModelScope.launch { loadProfile() }
+        viewModelScope.launch {
+            launch { loadProfile() }
+            launch { loadBanners() }
+            launch { loadFeed(page = 1) }
+        }
     }
 
     fun loadMore() {
         val s = _uiState.value
         if (s.feedLoading || s.feedLoadingMore || !s.feedHasMore) return
-        loadFeed(s.feedPage + 1)
+        viewModelScope.launch { loadFeed(s.feedPage + 1) }
     }
 
     fun logout() {
