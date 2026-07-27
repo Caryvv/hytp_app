@@ -54,6 +54,7 @@ fun HomeScreen(
     onOpenMall: () -> Unit,
     onOpenSocial: () -> Unit,
     onOpenMessages: () -> Unit = {},
+    onOpenSearch: () -> Unit = {},
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -97,7 +98,7 @@ fun HomeScreen(
                         Spacer(Modifier.height(Spacing.md))
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Box(modifier = Modifier.weight(1f)) {
-                                HomeSearchBar(onClick = { /* TODO: 搜索页 */ })
+                                HomeSearchBar(onClick = onOpenSearch)
                             }
                             Spacer(Modifier.width(Spacing.md))
                             Box(

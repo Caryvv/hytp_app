@@ -37,6 +37,7 @@ import com.example.hytp.feature.cart.ui.CartScreen
 import com.example.hytp.feature.order.ui.CheckoutScreen
 import com.example.hytp.feature.shop.ui.MallScreen
 import com.example.hytp.feature.shop.ui.ProductDetailScreen
+import com.example.hytp.feature.shop.ui.SearchScreen
 import com.example.hytp.feature.shop.ui.ShopScreen
 import com.example.hytp.feature.social.ui.FeedDetailScreen
 import com.example.hytp.feature.social.ui.FeedListScreen
@@ -152,6 +153,10 @@ private fun HomeNavHost(
                         popUpTo(TabRoutes.MINE_ROOT) { inclusive = true }
                     }
                 },
+                onOpenSearch = {
+                    onSwitchTab(BottomTab.Mall)
+                    mallNavController.navigate(Routes.SEARCH)
+                },
             )
         }
     }
@@ -254,6 +259,12 @@ private fun MallNavHost(
     ) {
         composable(TabRoutes.MALL_ROOT) {
             MallScreen(
+                onProductClick = { id -> navController.navigate(Routes.productDetail(id)) },
+            )
+        }
+        composable(Routes.SEARCH) {
+            SearchScreen(
+                onBack = { navController.popBackStack() },
                 onProductClick = { id -> navController.navigate(Routes.productDetail(id)) },
             )
         }

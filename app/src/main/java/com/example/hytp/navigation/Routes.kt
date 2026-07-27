@@ -12,6 +12,7 @@ object Routes {
 
     // ── 交易区路由（商城 & 我的 Tab 共用） ──
     const val MALL = "mall"
+    const val SEARCH = "search"
     const val PRODUCT_DETAIL = "product/{id}"
     const val SHOP = "shop/{id}"
 
