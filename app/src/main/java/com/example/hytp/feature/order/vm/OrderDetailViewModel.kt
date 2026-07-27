@@ -1,10 +1,12 @@
 package com.example.hytp.feature.order.vm
 
+import android.net.Uri
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.hytp.core.data.OrderRepository
 import com.example.hytp.core.data.PaymentRepository
+import com.example.hytp.core.data.UploadRepository
 import com.example.hytp.core.network.ApiResult
 import com.example.hytp.core.network.dto.Order
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -21,6 +23,10 @@ data class OrderDetailUiState(
     val error: String? = null,
     val actionRunning: Boolean = false,   // 支付/取消/确认等操作进行中
     val message: String? = null,          // 一次性提示（如"支付成功"）
+    /** 售后凭证：正在上传的图片 URI */
+    val uploadingImages: List<Uri> = emptyList(),
+    /** 售后凭证：已上传成功的图片 URL */
+    val uploadedUrls: List<String> = emptyList(),
 )
 
 /**
@@ -31,6 +37,7 @@ data class OrderDetailUiState(
 class OrderDetailViewModel @Inject constructor(
     private val orderRepository: OrderRepository,
     private val paymentRepository: PaymentRepository,
+    private val uploadRepository: UploadRepository,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
@@ -58,6 +65,25 @@ class OrderDetailViewModel @Inject constructor(
     }
 
     fun consumeMessage() = _uiState.update { it.copy(message = null) }
+
+    /** 售后凭证：用户选择图片后，逐个上传。 */
+    fun uploadEvidence(uris: List<Uri>) {
+        if (uris.isEmpty()) return
+        _uiState.update { it.copy(uploadingImages = uris) }
+        viewModelScope.launch {
+            val urls = mutableListOf<String>()
+            for (uri in uris) {
+                when (val r = uploadRepository.uploadImage(uri)) {
+                    is ApiResult.Success -> urls.add(r.data.url)
+                    is ApiResult.Error -> _uiState.update { it.copy(error = r.message) }
+                    is ApiResult.Failure -> _uiState.update { it.copy(error = "图片上传失败") }
+                }
+            }
+            _uiState.update { it.copy(uploadingImages = emptyList(), uploadedUrls = it.uploadedUrls + urls) }
+        }
+    }
+
+    fun removeEvidence(url: String) = _uiState.update { it.copy(uploadedUrls = it.uploadedUrls - url) }
 
     /** 支付：发起 → Mock 回调 → 以服务端订单状态为准重新拉取。 */
     fun pay(channel: Int = 1) {
@@ -93,9 +119,10 @@ class OrderDetailViewModel @Inject constructor(
     fun refund(reason: String) {
         _uiState.update { it.copy(actionRunning = true, error = null) }
         viewModelScope.launch {
-            when (val r = orderRepository.refund(orderNo, reason)) {
+            val evidence = _uiState.value.uploadedUrls.takeIf { it.isNotEmpty() }
+            when (val r = orderRepository.refund(orderNo, reason, evidence)) {
                 is ApiResult.Success -> {
-                    _uiState.update { it.copy(actionRunning = false, message = "售后申请已提交") }
+                    _uiState.update { it.copy(actionRunning = false, message = "售后申请已提交", uploadedUrls = emptyList()) }
                     load()
                 }
                 is ApiResult.Error ->

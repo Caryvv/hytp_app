@@ -85,11 +85,11 @@ class OrderRepository(
     suspend fun confirm(orderNo: String): ApiResult<Order> =
         safeApiCall { api.confirmOrder(orderNo) }
 
-    suspend fun refund(orderNo: String, reason: String): ApiResult<RefundResult> =
-        safeApiCall { api.refundOrder(orderNo, RefundRequest(reason = reason)) }
+    suspend fun refund(orderNo: String, reason: String, evidence: List<String>? = null): ApiResult<RefundResult> =
+        safeApiCall { api.refundOrder(orderNo, RefundRequest(reason = reason, evidence = evidence)) }
 
-    suspend fun review(orderNo: String, productId: Long, rating: Int, content: String): ApiResult<Review> =
-        safeApiCall { api.submitReview(orderNo, ReviewRequest(productId = productId, rating = rating, content = content)) }
+    suspend fun review(orderNo: String, productId: Long, rating: Int, content: String, images: List<String>? = null): ApiResult<Review> =
+        safeApiCall { api.submitReview(orderNo, ReviewRequest(productId = productId, rating = rating, content = content, images = images)) }
 
     // 租赁 / 品质保障金（交易 P1）
 

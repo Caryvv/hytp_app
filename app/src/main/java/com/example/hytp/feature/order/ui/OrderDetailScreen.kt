@@ -38,7 +38,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import android.net.Uri
 import com.example.hytp.core.network.dto.Order
+import com.example.hytp.core.ui.ImagePickerRow
 import com.example.hytp.feature.order.vm.OrderDetailViewModel
 
 /**
@@ -113,6 +115,10 @@ fun OrderDetailScreen(
 
     if (showRefund) {
         RefundDialog(
+            uploadedUrls = state.uploadedUrls,
+            uploading = state.uploadingImages.isNotEmpty(),
+            onPickImages = viewModel::uploadEvidence,
+            onRemoveImage = viewModel::removeEvidence,
             onDismiss = { showRefund = false },
             onConfirm = { reason -> showRefund = false; viewModel.refund(reason) },
         )
@@ -212,18 +218,35 @@ private fun OrderActions(
 }
 
 @Composable
-private fun RefundDialog(onDismiss: () -> Unit, onConfirm: (String) -> Unit) {
+private fun RefundDialog(
+    uploadedUrls: List<String>,
+    uploading: Boolean,
+    onPickImages: (List<Uri>) -> Unit,
+    onRemoveImage: (String) -> Unit,
+    onDismiss: () -> Unit,
+    onConfirm: (String) -> Unit,
+) {
     var reason by remember { mutableStateOf("") }
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text("申请售后") },
         text = {
-            OutlinedTextField(
-                value = reason,
-                onValueChange = { reason = it },
-                label = { Text("退款原因") },
-                modifier = Modifier.fillMaxWidth(),
-            )
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                OutlinedTextField(
+                    value = reason,
+                    onValueChange = { reason = it },
+                    label = { Text("退款原因") },
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                Text("上传凭证（选填）", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                ImagePickerRow(
+                    uploadedUrls = uploadedUrls,
+                    uploading = uploading,
+                    onPickImages = onPickImages,
+                    onRemove = onRemoveImage,
+                    maxCount = 6,
+                )
+            }
         },
         confirmButton = {
             TextButton(onClick = { onConfirm(reason.ifBlank { "七天无理由退货" }) }) { Text("提交") }

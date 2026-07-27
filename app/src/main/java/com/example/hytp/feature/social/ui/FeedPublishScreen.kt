@@ -39,8 +39,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.hytp.core.ui.HanfuButton
-import com.example.hytp.core.ui.HanfuButtonSize
 import com.example.hytp.core.ui.HanfuButtonVariant
+import com.example.hytp.core.ui.ImagePickerRow
 import com.example.hytp.feature.social.vm.FeedPublishViewModel
 
 /**
@@ -57,12 +57,6 @@ fun FeedPublishScreen(
     var content by remember { mutableStateOf("") }
     var tagsText by remember { mutableStateOf("") }
     var city by remember { mutableStateOf("") }
-
-    val imagePicker = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetMultipleContents(),
-    ) { uris: List<Uri> ->
-        if (uris.isNotEmpty()) viewModel.uploadImages(uris)
-    }
 
     LaunchedEffect(state.publishedId) { if (state.publishedId != null) onPublished() }
 
@@ -88,40 +82,12 @@ fun FeedPublishScreen(
             )
 
             // ── 图片选择 + 上传 ──
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                state.uploadedUrls.forEach { url ->
-                    Box(
-                        modifier = Modifier
-                            .size(72.dp)
-                            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, MaterialTheme.shapes.small)
-                            .clickable { viewModel.removeImage(url) },
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        Text("📷", style = MaterialTheme.typography.bodySmall)
-                    }
-                }
-                if (state.uploadedUrls.size < 9) {
-                    Box(
-                        modifier = Modifier
-                            .size(72.dp)
-                            .border(1.dp, MaterialTheme.colorScheme.outline, MaterialTheme.shapes.small)
-                            .clickable { imagePicker.launch("image/*") },
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        if (state.uploadingImages.isNotEmpty()) {
-                            CircularProgressIndicator(modifier = Modifier.size(24.dp))
-                        } else {
-                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                Text("＋", style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                                Text("图片", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                            }
-                        }
-                    }
-                }
-            }
+            ImagePickerRow(
+                uploadedUrls = state.uploadedUrls,
+                uploading = state.uploadingImages.isNotEmpty(),
+                onPickImages = viewModel::uploadImages,
+                onRemove = viewModel::removeImage,
+            )
 
             OutlinedTextField(
                 value = tagsText,

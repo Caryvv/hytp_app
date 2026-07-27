@@ -29,6 +29,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.hytp.core.ui.ImagePickerRow
 import com.example.hytp.feature.order.vm.ReviewViewModel
 
 /**
@@ -79,6 +80,13 @@ fun ReviewScreen(
                 onValueChange = { content = it },
                 label = { Text("说说这次的购物体验") },
                 modifier = Modifier.fillMaxWidth().height(160.dp),
+            )
+            Text("晒图（选填）", style = MaterialTheme.typography.titleSmall)
+            ImagePickerRow(
+                uploadedUrls = state.uploadedUrls,
+                uploading = state.uploadingImages.isNotEmpty(),
+                onPickImages = viewModel::uploadImages,
+                onRemove = viewModel::removeImage,
             )
             if (state.error != null) {
                 Text(state.error!!, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
