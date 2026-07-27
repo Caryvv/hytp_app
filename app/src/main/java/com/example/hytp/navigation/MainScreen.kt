@@ -30,6 +30,7 @@ import com.example.hytp.feature.message.ui.MessageCenterScreen
 import com.example.hytp.feature.mine.ui.MineScreen
 import com.example.hytp.feature.mine.ui.TaskScreen
 import com.example.hytp.feature.mine.ui.RechargeScreen
+import com.example.hytp.feature.mine.ui.WithdrawScreen
 import com.example.hytp.feature.order.ui.OrderDetailScreen
 import com.example.hytp.feature.order.ui.OrderListScreen
 import com.example.hytp.feature.order.ui.ReviewScreen
@@ -366,6 +367,7 @@ private fun MineNavHost(
                 onLoggedOut = onLoggedOut,
                 onOpenOrders = { navController.navigate(Routes.ORDER_LIST) },
                 onOpenRecharge = { navController.navigate(Routes.RECHARGE) },
+                onOpenWithdraw = { balanceCoin -> navController.navigate(Routes.withdraw(balanceCoin)) },
                 onOpenTasks = { navController.navigate(Routes.TASKS) },
                 onOpenMessages = { navController.navigate(Routes.MESSAGE_CENTER) },
                 refreshSignal = rechargedCoin.value,
@@ -376,6 +378,20 @@ private fun MineNavHost(
             RechargeScreen(
                 onBack = { navController.popBackStack() },
                 onRecharged = { coin ->
+                    navController.previousBackStackEntry
+                        ?.savedStateHandle?.set("recharged_coin", coin)
+                    navController.popBackStack()
+                },
+            )
+        }
+        composable(
+            route = Routes.WITHDRAW,
+            arguments = listOf(navArgument("balanceCoin") { type = NavType.StringType }),
+        ) {
+            WithdrawScreen(
+                onBack = { navController.popBackStack() },
+                onWithdrawn = { coin ->
+                    // 复用「我的」余额刷新信号（任意非空值即触发 loadProfile）
                     navController.previousBackStackEntry
                         ?.savedStateHandle?.set("recharged_coin", coin)
                     navController.popBackStack()

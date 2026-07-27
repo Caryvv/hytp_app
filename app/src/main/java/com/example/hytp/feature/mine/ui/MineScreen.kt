@@ -43,6 +43,7 @@ fun MineScreen(
     onLoggedOut: () -> Unit,
     onOpenOrders: () -> Unit,
     onOpenRecharge: () -> Unit = {},
+    onOpenWithdraw: (Int) -> Unit = {},
     onOpenTasks: () -> Unit = {},
     onOpenMessages: () -> Unit = {},
     refreshSignal: Int? = null,
@@ -125,6 +126,13 @@ fun MineScreen(
                             HanfuButton(
                                 text = "充值",
                                 onClick = onOpenRecharge,
+                                variant = HanfuButtonVariant.Outline,
+                                size = HanfuButtonSize.Small,
+                            )
+                            Spacer(Modifier.width(Spacing.xs))
+                            HanfuButton(
+                                text = "提现",
+                                onClick = { onOpenWithdraw(toCoin(p.balance)) },
                                 variant = HanfuButtonVariant.Outline,
                                 size = HanfuButtonSize.Small,
                             )

@@ -50,6 +50,8 @@ import com.example.hytp.core.network.dto.PayRequest
 import com.example.hytp.core.network.dto.PayResult
 import com.example.hytp.core.network.dto.RechargeRequest
 import com.example.hytp.core.network.dto.RechargeResult
+import com.example.hytp.core.network.dto.WithdrawRequest
+import com.example.hytp.core.network.dto.WithdrawResult
 import com.example.hytp.core.network.dto.ClaimRequest
 import com.example.hytp.core.network.dto.ClaimResult
 import com.example.hytp.core.network.dto.TaskListResult
@@ -327,6 +329,10 @@ interface HytpApiService {
     // 同袍币充值（Mock）
     @POST("wallet/recharge")
     suspend fun recharge(@Body body: RechargeRequest): ApiResponse<RechargeResult>
+
+    // 同袍币提现（Mock 即时扣减）
+    @POST("wallet/withdraw")
+    suspend fun withdraw(@Body body: WithdrawRequest): ApiResponse<WithdrawResult>
 
     // 任务系统（赚同袍币）
     @GET("tasks")

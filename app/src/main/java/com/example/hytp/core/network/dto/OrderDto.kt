@@ -185,6 +185,20 @@ data class RechargeResult(
     val mock: Boolean = false,
 )
 
+/** 提现请求体。coin 为同袍币数量（100 同袍币 = 1 元）。 */
+data class WithdrawRequest(
+    val coin: Int,
+)
+
+/** 提现响应 data（对齐 WalletService::withdraw）。 */
+data class WithdrawResult(
+    val withdrawNo: String = "",
+    val coin: Int = 0,
+    val amountYuan: String = "0.00",
+    val balanceCoin: Int = 0,
+    val mock: Boolean = false,
+)
+
 // ---------------- 售后 / 评价 ----------------
 
 /** 售后申请请求体。 */

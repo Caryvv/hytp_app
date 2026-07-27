@@ -8,6 +8,8 @@ import com.example.hytp.core.network.dto.PayRequest
 import com.example.hytp.core.network.dto.PayResult
 import com.example.hytp.core.network.dto.RechargeRequest
 import com.example.hytp.core.network.dto.RechargeResult
+import com.example.hytp.core.network.dto.WithdrawRequest
+import com.example.hytp.core.network.dto.WithdrawResult
 import com.example.hytp.core.network.safeApiCall
 
 /**
@@ -27,4 +29,8 @@ class PaymentRepository(
     /** 充值同袍币（Mock 直接到账）。coin 为同袍币数量（100 同袍币 = 1 元）。 */
     suspend fun recharge(coin: Int): ApiResult<RechargeResult> =
         safeApiCall { api.recharge(RechargeRequest(coin)) }
+
+    /** 提现同袍币（Mock 即时扣减）。余额不足由后端返回 BALANCE_NOT_ENOUGH。 */
+    suspend fun withdraw(coin: Int): ApiResult<WithdrawResult> =
+        safeApiCall { api.withdraw(WithdrawRequest(coin)) }
 }
