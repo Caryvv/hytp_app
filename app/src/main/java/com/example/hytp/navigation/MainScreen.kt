@@ -45,6 +45,7 @@ import com.example.hytp.feature.social.ui.FeedListScreen
 import com.example.hytp.feature.social.ui.FeedPublishScreen
 import com.example.hytp.feature.social.ui.UserProfileScreen
 import com.example.hytp.feature.address.ui.AddressScreen
+import com.example.hytp.feature.ai.ui.QaScreen
 
 /**
  * 主页面骨架：底部 4 Tab 导航（首页/社交/商城/我的），每 Tab 独立导航栈。
@@ -158,7 +159,11 @@ private fun HomeNavHost(
                     onSwitchTab(BottomTab.Mall)
                     mallNavController.navigate(Routes.SEARCH)
                 },
+                onOpenQa = { navController.navigate(Routes.QA) },
             )
+        }
+        composable(Routes.QA) {
+            QaScreen(onBack = { navController.popBackStack() })
         }
     }
 }

@@ -55,6 +55,7 @@ fun HomeScreen(
     onOpenSocial: () -> Unit,
     onOpenMessages: () -> Unit = {},
     onOpenSearch: () -> Unit = {},
+    onOpenQa: () -> Unit = {},
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -170,7 +171,7 @@ fun HomeScreen(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceEvenly,
                         ) {
-                            HomeEntry("🎓", "萌新入门", onClick = { /* TODO: beginner */ })
+                            HomeEntry("💬", "智能问答", onClick = onOpenQa)
                             HomeEntry("👥", "同袍社交", onClick = onOpenSocial)
                             HomeEntry("🏪", "汉服商城", onClick = onOpenMall)
                             HomeEntry("🏯", "文旅服务", onClick = { /* TODO: travel */ })

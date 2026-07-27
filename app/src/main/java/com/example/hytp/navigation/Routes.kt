@@ -35,6 +35,10 @@ object Routes {
     fun review(orderNo: String, productId: Long): String = "review/$orderNo/$productId"
 
     // ── 社交路由（社交 Tab） ──
+    // ── AI ──
+    const val QA = "ai/qa"
+
+    // ── 社交路由（社交 Tab） ──
     const val FEED_LIST = "feeds"
     const val FEED_PUBLISH = "feed/publish"
     const val FEED_DETAIL = "feed/{id}"

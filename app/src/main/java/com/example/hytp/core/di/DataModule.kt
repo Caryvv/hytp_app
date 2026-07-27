@@ -2,6 +2,7 @@ package com.example.hytp.core.di
 
 import android.content.Context
 import com.example.hytp.core.data.AddressRepository
+import com.example.hytp.core.data.AiRepository
 import com.example.hytp.core.data.AuthRepository
 import com.example.hytp.core.data.CartRepository
 import com.example.hytp.core.data.ChatRepository
@@ -113,4 +114,10 @@ object DataModule {
     fun provideHomeRepository(
         api: HytpApiService,
     ): HomeRepository = HomeRepository(api)
+
+    @Provides
+    @Singleton
+    fun provideAiRepository(
+        api: HytpApiService,
+    ): AiRepository = AiRepository(api)
 }

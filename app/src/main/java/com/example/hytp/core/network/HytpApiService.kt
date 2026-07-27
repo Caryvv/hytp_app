@@ -13,6 +13,8 @@ import com.example.hytp.core.network.dto.CreateOrderResult
 import com.example.hytp.core.network.dto.DepositClaimRequest
 import com.example.hytp.core.network.dto.DepositClaimResult
 import com.example.hytp.core.network.dto.AddCommentRequest
+import com.example.hytp.core.network.dto.QaAnswer
+import com.example.hytp.core.network.dto.QaRequest
 import com.example.hytp.core.network.dto.ChatMessage
 import com.example.hytp.core.network.dto.ChatMessageList
 import com.example.hytp.core.network.dto.Conversation
@@ -288,6 +290,11 @@ interface HytpApiService {
 
     @POST("chat/messages")
     suspend fun sendChatMessage(@Body body: SendMessageRequest): ApiResponse<ChatMessage>
+
+    // ---------------- AI 智能问答 ----------------
+
+    @POST("ai/qa")
+    suspend fun aiQa(@Body body: QaRequest): ApiResponse<QaAnswer>
 
     // ---------------- 社群 ----------------
 
