@@ -17,7 +17,6 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -31,7 +30,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.hytp.core.ui.EmptyView
+import com.example.hytp.core.ui.ErrorView
 import com.example.hytp.core.ui.HomeSearchBar
+import com.example.hytp.core.ui.LoadingView
 import com.example.hytp.feature.shop.vm.SearchUiState
 import com.example.hytp.feature.shop.vm.SearchViewModel
 
@@ -57,7 +59,7 @@ fun SearchScreen(
                     modifier = Modifier.size(40.dp).clickable { onBack() },
                     contentAlignment = Alignment.Center,
                 ) {
-                    Text("←", style = MaterialTheme.typography.titleLarge)
+                    Text("‹", style = MaterialTheme.typography.headlineMedium)
                 }
                 Spacer(Modifier.width(4.dp))
                 Box(Modifier.weight(1f)) {
@@ -81,25 +83,16 @@ private fun Results(
     onLoadMore: () -> Unit,
 ) {
     when {
-        state.loading && state.products.isEmpty() ->
-            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator()
-            }
+        state.loading && state.products.isEmpty() -> LoadingView(message = "搜索中")
 
         state.error != null && state.products.isEmpty() ->
-            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text(state.error, color = MaterialTheme.colorScheme.error)
-            }
+            ErrorView(message = state.error, onRetry = onLoadMore)
 
         state.submitted.isEmpty() ->
-            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text("输入关键词搜索汉服商品", color = MaterialTheme.colorScheme.onSurfaceVariant)
-            }
+            EmptyView(title = "搜汉服商品", subtitle = "输入关键词，找形制 · 找同袍所爱")
 
         state.products.isEmpty() ->
-            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text("没有找到「${state.submitted}」相关商品", color = MaterialTheme.colorScheme.onSurfaceVariant)
-            }
+            EmptyView(title = "暂无相关商品", subtitle = "换个关键词试试「${state.submitted}」")
 
         else -> {
             val gridState = rememberLazyGridState()
