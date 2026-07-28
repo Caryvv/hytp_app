@@ -19,8 +19,10 @@ datastore = "1.1.1"
 coroutines = "1.9.0"
 lifecycleCompose = "2.8.7"
 coil = "2.7.0"
+ossAndroid = "2.9.13"
 
 [libraries]
+aliyun-oss-android = { group = "com.aliyun.dpa", name = "oss-android-sdk", version.ref = "ossAndroid" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }

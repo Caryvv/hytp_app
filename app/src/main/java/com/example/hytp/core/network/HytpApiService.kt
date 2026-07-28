@@ -70,6 +70,7 @@ import com.example.hytp.core.network.dto.SmsSendRequest
 import com.example.hytp.core.network.dto.SmsSendResponse
 import com.example.hytp.core.network.dto.UpdateCartRequest
 import com.example.hytp.core.network.dto.UpdateProfileRequest
+import com.example.hytp.core.network.dto.StsToken
 import com.example.hytp.core.network.dto.UploadResult
 import com.example.hytp.core.network.dto.UserProfile
 import okhttp3.MultipartBody
@@ -352,6 +353,10 @@ interface HytpApiService {
     @Multipart
     @POST("upload")
     suspend fun uploadFile(@retrofit2.http.Part file: MultipartBody.Part): ApiResponse<UploadResult>
+
+    /** OSS 直传临时凭证；未配置时后端返 enabled=false，客户端回退中转上传。 */
+    @GET("upload/sts")
+    suspend fun getStsToken(): ApiResponse<StsToken>
 
     // 首页
     @GET("home/banners")

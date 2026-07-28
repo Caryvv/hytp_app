@@ -87,6 +87,9 @@ dependencies {
     // 图片加载（Coil）
     implementation(libs.coil.compose)
 
+    // 阿里云 OSS 直传（STS 临时凭证；未配置时回退服务器中转上传）
+    implementation(libs.aliyun.oss.android)
+
     testImplementation(libs.junit)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
