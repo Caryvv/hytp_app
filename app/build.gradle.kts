@@ -30,8 +30,8 @@ android {
 
     buildTypes {
         debug {
-            // 模拟器访问宿主机 localhost 的固定地址（本机 php -S 0.0.0.0:8788）
-            buildConfigField("String", "BASE_URL", "\"http://10.0.2.2:8788/\"")
+            // 联调服务器（腾讯云 HTTP+IP，nginx 80 → api 入口）。本机模拟器测本地时改回 http://10.0.2.2:8788/
+            buildConfigField("String", "BASE_URL", "\"http://124.220.15.182/\"")
         }
         release {
             optimization {
