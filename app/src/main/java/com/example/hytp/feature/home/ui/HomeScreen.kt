@@ -56,6 +56,8 @@ fun HomeScreen(
     onOpenMessages: () -> Unit = {},
     onOpenSearch: () -> Unit = {},
     onOpenQa: () -> Unit = {},
+    onFeedClick: (Long) -> Unit = {},
+    onAuthorClick: (Long) -> Unit = {},
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -227,8 +229,8 @@ fun HomeScreen(
                             items(state.feedItems, key = { "feed_${it.id}" }) { feed ->
                                 FeedCard(
                                     feed = feed,
-                                    onClick = { /* TODO: 从首页进详情需跨 tab 导航 */ },
-                                    onAuthorClick = { /* TODO: 进主页 */ },
+                                    onClick = { onFeedClick(feed.id) },
+                                    onAuthorClick = { onAuthorClick(feed.userId) },
                                     onLike = { },
                                     onFavorite = { },
                                 )

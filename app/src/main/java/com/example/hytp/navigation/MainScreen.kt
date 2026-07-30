@@ -160,6 +160,14 @@ private fun HomeNavHost(
                     mallNavController.navigate(Routes.SEARCH)
                 },
                 onOpenQa = { navController.navigate(Routes.QA) },
+                onFeedClick = { id ->
+                    onSwitchTab(BottomTab.Social)
+                    socialNavController.navigate(Routes.feedDetail(id))
+                },
+                onAuthorClick = { id ->
+                    onSwitchTab(BottomTab.Social)
+                    socialNavController.navigate(Routes.userProfile(id))
+                },
             )
         }
         composable(Routes.QA) {
