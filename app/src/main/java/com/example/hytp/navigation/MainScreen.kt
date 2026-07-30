@@ -63,6 +63,8 @@ fun MainScreen(
     val mineNavController = rememberNavController()
 
     var currentTab by rememberSaveable { mutableStateOf(BottomTab.Home) }
+    // 社交 tab 发布动态后置脏，切回首页时触发推荐流刷新（跨 tab 信号）
+    var homeFeedDirty by rememberSaveable { mutableStateOf(false) }
 
     Scaffold(
         bottomBar = {
@@ -101,10 +103,14 @@ fun MainScreen(
             when (tab) {
                 BottomTab.Home -> HomeNavHost(
                     homeNavController, contentModifier, socialNavController, mallNavController, mineNavController,
-                ) { currentTab = it }
+                    feedDirty = homeFeedDirty,
+                    onFeedRefreshed = { homeFeedDirty = false },
+                    onSwitchTab = { currentTab = it },
+                )
 
                 BottomTab.Social -> SocialNavHost(
                     socialNavController, contentModifier,
+                    onFeedPublished = { homeFeedDirty = true },
                 )
 
                 BottomTab.Mall -> MallNavHost(
@@ -128,6 +134,8 @@ private fun HomeNavHost(
     socialNavController: androidx.navigation.NavHostController,
     mallNavController: androidx.navigation.NavHostController,
     mineNavController: androidx.navigation.NavHostController,
+    feedDirty: Boolean,
+    onFeedRefreshed: () -> Unit,
     onSwitchTab: (BottomTab) -> Unit,
 ) {
     NavHost(
@@ -168,6 +176,8 @@ private fun HomeNavHost(
                     onSwitchTab(BottomTab.Social)
                     socialNavController.navigate(Routes.userProfile(id))
                 },
+                refreshSignal = feedDirty,
+                onRefreshConsumed = onFeedRefreshed,
             )
         }
         composable(Routes.QA) {
@@ -180,6 +190,7 @@ private fun HomeNavHost(
 private fun SocialNavHost(
     navController: androidx.navigation.NavHostController,
     modifier: Modifier,
+    onFeedPublished: () -> Unit = {},
 ) {
     NavHost(
         navController = navController,
@@ -204,6 +215,7 @@ private fun SocialNavHost(
                 onBack = { navController.popBackStack() },
                 onPublished = {
                     navController.previousBackStackEntry?.savedStateHandle?.set("feedPublished", true)
+                    onFeedPublished()
                     navController.popBackStack()
                 },
             )

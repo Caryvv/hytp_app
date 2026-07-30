@@ -20,10 +20,12 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -49,6 +51,7 @@ import com.example.hytp.ui.theme.Spacing
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     onOpenMall: () -> Unit,
@@ -58,10 +61,20 @@ fun HomeScreen(
     onOpenQa: () -> Unit = {},
     onFeedClick: (Long) -> Unit = {},
     onAuthorClick: (Long) -> Unit = {},
+    refreshSignal: Boolean = false,
+    onRefreshConsumed: () -> Unit = {},
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val listState = rememberLazyListState()
+
+    // 发动态成功返回首页后刷新推荐流
+    LaunchedEffect(refreshSignal) {
+        if (refreshSignal) {
+            viewModel.refresh()
+            onRefreshConsumed()
+        }
+    }
 
     // 检测滚动到底部触发 loadMore
     val shouldLoadMore by remember {
@@ -92,6 +105,11 @@ fun HomeScreen(
                 }
 
             else -> {
+                PullToRefreshBox(
+                    isRefreshing = state.refreshing,
+                    onRefresh = { viewModel.refresh() },
+                    modifier = Modifier.fillMaxSize(),
+                ) {
                 LazyColumn(
                     state = listState,
                     modifier = Modifier.fillMaxSize().padding(horizontal = Spacing.lg),
@@ -252,6 +270,7 @@ fun HomeScreen(
                     item(key = "bottom_spacer") {
                         Spacer(Modifier.height(Spacing.xxl))
                     }
+                }
                 }
             }
         }
