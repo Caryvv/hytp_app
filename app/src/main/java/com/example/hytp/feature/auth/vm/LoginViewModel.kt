@@ -2,7 +2,6 @@ package com.example.hytp.feature.auth.vm
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.hytp.BuildConfig
 import com.example.hytp.core.data.AuthRepository
 import com.example.hytp.core.network.ApiResult
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -51,8 +50,9 @@ class LoginViewModel @Inject constructor(
                     _uiState.update {
                         it.copy(
                             sending = false,
-                            // 仅 debug 展示 Mock 回带的验证码，便于联调
-                            devCode = if (BuildConfig.DEBUG) result.data.devCode else null,
+                            // 后端仅在 Mock 模式（sms.mock=true）回带 devCode，正式短信通道返 null。
+                            // 以"后端是否返回"为准，不依赖 BuildConfig.DEBUG，使 release 联调包也能展示。
+                            devCode = result.data.devCode,
                         )
                     }
                     startCountdown()
