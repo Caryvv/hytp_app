@@ -1,8 +1,19 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.hilt)
     alias(libs.plugins.ksp)
+}
+
+// 发布签名配置从 keystore.properties 读取（该文件已 gitignore，不入库）。
+// 缺失时（如 CI 未提供）releaseSigning 为 null，release 回退默认签名，避免构建直接失败。
+val keystorePropsFile = rootProject.file("keystore.properties")
+val keystoreProps = Properties().apply {
+    if (keystorePropsFile.exists()) {
+        keystorePropsFile.inputStream().use { load(it) }
+    }
 }
 
 android {
@@ -28,12 +39,25 @@ android {
 
     buildToolsVersion = "36.1.0"
 
+    signingConfigs {
+        if (keystoreProps.isNotEmpty()) {
+            create("release") {
+                storeFile = file(keystoreProps.getProperty("storeFile"))
+                storePassword = keystoreProps.getProperty("storePassword")
+                keyAlias = keystoreProps.getProperty("keyAlias")
+                keyPassword = keystoreProps.getProperty("keyPassword")
+            }
+        }
+    }
+
     buildTypes {
         debug {
             // 联调服务器（腾讯云 HTTP+IP，nginx 80 → api 入口）。本机模拟器测本地时改回 http://10.0.2.2:8788/
             buildConfigField("String", "BASE_URL", "\"http://124.220.15.182/\"")
         }
         release {
+            // 有 keystore.properties 时用正式签名；缺失则回退默认（不阻断本地/CI 构建）
+            signingConfig = signingConfigs.findByName("release") ?: signingConfig
             optimization {
                 enable = false
             }

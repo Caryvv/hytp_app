@@ -15,3 +15,8 @@
 local.properties
 .kotlin/
 /plan.md
+
+# 发布签名（绝不入库：密钥+密码泄露=任何人可冒名更新你的 app）
+keystore.properties
+*.jks
+*.keystore
