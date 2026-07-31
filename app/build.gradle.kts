@@ -58,6 +58,9 @@ android {
         release {
             // 有 keystore.properties 时用正式签名；缺失则回退默认（不阻断本地/CI 构建）
             signingConfig = signingConfigs.findByName("release") ?: signingConfig
+            // 临时：release 包也指向联调服务器（HTTP+IP，已在 network_security_config 明文白名单）。
+            // 正式发给真实用户前改回默认的 https://api.hytp.com/（配好域名+备案+HTTPS 后）。
+            buildConfigField("String", "BASE_URL", "\"http://124.220.15.182/\"")
             optimization {
                 enable = false
             }
