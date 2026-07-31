@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths>
+    <!-- getExternalFilesDir("apk") 对应 external-files-path 根下的 apk 目录 -->
+    <external-files-path
+        name="apk"
+        path="apk/" />
+</paths>

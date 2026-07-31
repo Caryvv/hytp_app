@@ -1,5 +1,6 @@
 package com.example.hytp.core.network
 
+import com.example.hytp.core.network.dto.AppVersionCheck
 import com.example.hytp.core.network.dto.BannerItem
 import com.example.hytp.core.network.dto.AddCartRequest
 import com.example.hytp.core.network.dto.Address
@@ -364,4 +365,11 @@ interface HytpApiService {
 
     @GET("home/feed")
     suspend fun getHomeFeed(@QueryMap query: Map<String, String>): ApiResponse<PageData<Feed>>
+
+    // 应用内更新检查（免登录）
+    @GET("app/version/check")
+    suspend fun checkAppVersion(
+        @Query("platform") platform: String,
+        @Query("versionCode") versionCode: Int,
+    ): ApiResponse<AppVersionCheck>
 }

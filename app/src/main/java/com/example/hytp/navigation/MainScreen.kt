@@ -91,6 +91,9 @@ fun MainScreen(
     ) { innerPadding ->
         val contentModifier = Modifier.padding(innerPadding)
 
+        // 应用内更新检查（进程内仅一次，有新版弹窗）
+        com.example.hytp.feature.update.UpdateGate()
+
         // 只渲染当前选中 Tab 的 NavHost，其余不可见（但 NavController 存活）
         AnimatedContent(
             targetState = currentTab,
