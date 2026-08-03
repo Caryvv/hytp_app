@@ -24,6 +24,7 @@ data class QaUiState(
     val messages: List<QaMessage> = listOf(
         QaMessage(0, "你好，我是汉服知识助手～ 形制、山正区分、身材选款、穿搭配饰，尽管问我。", fromUser = false),
     ),
+    val draft: String = "",
     val sending: Boolean = false,
     val error: String? = null,
 )
@@ -42,13 +43,18 @@ class QaViewModel @Inject constructor(
 
     private var nextId = 1L
 
+    /** 更新输入框草稿（存入 ViewModel，切 Tab 不丢）。 */
+    fun setDraft(text: String) {
+        _uiState.update { it.copy(draft = text) }
+    }
+
     fun ask(question: String) {
         val q = question.trim()
         if (q.isBlank() || _uiState.value.sending) return
 
-        // 先上屏用户消息
+        // 先上屏用户消息，清空草稿
         val userMsg = QaMessage(nextId++, q, fromUser = true)
-        _uiState.update { it.copy(messages = it.messages + userMsg, sending = true, error = null) }
+        _uiState.update { it.copy(messages = it.messages + userMsg, draft = "", sending = true, error = null) }
 
         // 取最近历史（排除开场白 id=0）作为上下文
         val history = _uiState.value.messages

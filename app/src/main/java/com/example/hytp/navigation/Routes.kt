@@ -35,10 +35,6 @@ object Routes {
     fun review(orderNo: String, productId: Long): String = "review/$orderNo/$productId"
 
     // ── 社交路由（社交 Tab） ──
-    // ── AI ──
-    const val QA = "ai/qa"
-
-    // ── 社交路由（社交 Tab） ──
     const val FEED_LIST = "feeds"
     const val FEED_PUBLISH = "feed/publish"
     const val FEED_DETAIL = "feed/{id}"
@@ -67,10 +63,12 @@ object TabRoutes {
     const val MALL_ROOT = "tab_mall"
     const val MINE_ROOT = "tab_mine"
 
+    // 智能问答 Tab 无嵌套 NavHost（单页），故不在此返回根路由
     fun getRoot(tab: com.example.hytp.core.ui.BottomTab): String = when (tab) {
         com.example.hytp.core.ui.BottomTab.Home -> HOME_ROOT
         com.example.hytp.core.ui.BottomTab.Social -> SOCIAL_ROOT
         com.example.hytp.core.ui.BottomTab.Mall -> MALL_ROOT
         com.example.hytp.core.ui.BottomTab.Mine -> MINE_ROOT
+        com.example.hytp.core.ui.BottomTab.Qa -> "" // 无根路由（不会被调用：Qa 分支在点击处已置 null 跳过）
     }
 }

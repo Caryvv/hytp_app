@@ -27,9 +27,6 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -46,12 +43,12 @@ import com.example.hytp.feature.ai.vm.QaViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun QaScreen(
-    onBack: () -> Unit,
+    onBack: (() -> Unit)? = null,
+    modifier: Modifier = Modifier,
     viewModel: QaViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val listState = rememberLazyListState()
-    var input by remember { mutableStateOf("") }
 
     // 新消息 / 思考态出现时滚到底
     LaunchedEffect(state.messages.size, state.sending) {
@@ -60,11 +57,14 @@ fun QaScreen(
     }
 
     Scaffold(
+        modifier = modifier,
         topBar = {
             TopAppBar(
                 title = { Text("汉服智能问答") },
                 navigationIcon = {
-                    IconButton(onClick = onBack) { Text("‹", style = MaterialTheme.typography.headlineMedium) }
+                    if (onBack != null) {
+                        IconButton(onClick = onBack) { Text("‹", style = MaterialTheme.typography.headlineMedium) }
+                    }
                 },
             )
         },
@@ -72,16 +72,16 @@ fun QaScreen(
             HorizontalDivider()
             Row(Modifier.fillMaxWidth().padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
                 OutlinedTextField(
-                    value = input,
-                    onValueChange = { input = it },
+                    value = state.draft,
+                    onValueChange = { viewModel.setDraft(it) },
                     placeholder = { Text("问问汉服的事…") },
                     modifier = Modifier.weight(1f),
                     singleLine = true,
                 )
                 Spacer(Modifier.padding(4.dp))
                 Button(
-                    onClick = { viewModel.ask(input); input = "" },
-                    enabled = !state.sending && input.isNotBlank(),
+                    onClick = { viewModel.ask(state.draft) },
+                    enabled = !state.sending && state.draft.isNotBlank(),
                 ) { Text("发送") }
             }
         },

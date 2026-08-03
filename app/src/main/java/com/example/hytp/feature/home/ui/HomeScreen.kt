@@ -58,7 +58,6 @@ fun HomeScreen(
     onOpenSocial: () -> Unit,
     onOpenMessages: () -> Unit = {},
     onOpenSearch: () -> Unit = {},
-    onOpenQa: () -> Unit = {},
     onFeedClick: (Long) -> Unit = {},
     onAuthorClick: (Long) -> Unit = {},
     refreshSignal: Boolean = false,
@@ -191,7 +190,7 @@ fun HomeScreen(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceEvenly,
                         ) {
-                            HomeEntry("💬", "智能问答", onClick = onOpenQa)
+                            HomeEntry("🌱", "萌新入门", onClick = { /* TODO: newbie guide */ })
                             HomeEntry("👥", "同袍社交", onClick = onOpenSocial)
                             HomeEntry("🏪", "汉服商城", onClick = onOpenMall)
                             HomeEntry("🏯", "文旅服务", onClick = { /* TODO: travel */ })

@@ -78,8 +78,9 @@ fun MainScreen(
                             BottomTab.Social -> socialNavController
                             BottomTab.Mall -> mallNavController
                             BottomTab.Mine -> mineNavController
+                            BottomTab.Qa -> null // 智能问答无子页面，再次点击无需回根
                         }
-                        target.navigate(TabRoutes.getRoot(tab)) {
+                        target?.navigate(TabRoutes.getRoot(tab)) {
                             popUpTo(TabRoutes.getRoot(tab)) { inclusive = true }
                         }
                     } else {
@@ -115,6 +116,8 @@ fun MainScreen(
                     socialNavController, contentModifier,
                     onFeedPublished = { homeFeedDirty = true },
                 )
+
+                BottomTab.Qa -> QaScreen(modifier = contentModifier)
 
                 BottomTab.Mall -> MallNavHost(
                     mallNavController, contentModifier,
@@ -170,7 +173,6 @@ private fun HomeNavHost(
                     onSwitchTab(BottomTab.Mall)
                     mallNavController.navigate(Routes.SEARCH)
                 },
-                onOpenQa = { navController.navigate(Routes.QA) },
                 onFeedClick = { id ->
                     onSwitchTab(BottomTab.Social)
                     socialNavController.navigate(Routes.feedDetail(id))
@@ -182,9 +184,6 @@ private fun HomeNavHost(
                 refreshSignal = feedDirty,
                 onRefreshConsumed = onFeedRefreshed,
             )
-        }
-        composable(Routes.QA) {
-            QaScreen(onBack = { navController.popBackStack() })
         }
     }
 }

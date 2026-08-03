@@ -19,13 +19,14 @@ enum class BottomTab(
 ) {
     Home("首页", "🏠"),
     Social("社交", "👥"),
+    Qa("智能问答", "💬"),
     Mall("商城", "🏪"),
     Mine("我的", "👤"),
 }
 
 /**
  * 国风底部导航栏（docs/dev/15 §6.7）。
- * 4 Tab：首页 / 社交 / 商城 / 我的。
+ * 5 Tab：首页 / 社交 / 智能问答 / 商城 / 我的（智能问答居中）。
  * 选中黛青（primary），未选中烟灰；文字 labelSmall。
  */
 @Composable
