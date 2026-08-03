@@ -1,5 +1,6 @@
 package com.example.hytp.feature.home.ui
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -22,6 +23,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -36,10 +38,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
+import com.example.hytp.R
 import com.example.hytp.core.network.dto.BannerItem
 import com.example.hytp.core.ui.DynastyTag
 import com.example.hytp.core.ui.HomeSearchBar
@@ -127,7 +131,12 @@ fun HomeScreen(
                                     .clickable { onOpenMessages() },
                                 contentAlignment = Alignment.Center,
                             ) {
-                                Text("🔔", style = MaterialTheme.typography.titleLarge)
+                                Icon(
+                                    painter = painterResource(R.drawable.icon_bell),
+                                    contentDescription = "消息",
+                                    modifier = Modifier.size(24.dp),
+                                    tint = MaterialTheme.colorScheme.onSurface,
+                                )
                                 if (state.unreadCount > 0) {
                                     Box(
                                         modifier = Modifier
@@ -190,11 +199,11 @@ fun HomeScreen(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceEvenly,
                         ) {
-                            HomeEntry("🌱", "萌新入门", onClick = { /* TODO: newbie guide */ })
-                            HomeEntry("👥", "同袍社交", onClick = onOpenSocial)
-                            HomeEntry("🏪", "汉服商城", onClick = onOpenMall)
-                            HomeEntry("🏯", "文旅服务", onClick = { /* TODO: travel */ })
-                            HomeEntry("📖", "文化传承", onClick = { /* TODO: culture */ })
+                            HomeEntry(R.drawable.icon_beginner, "萌新入门", onClick = { /* TODO: newbie guide */ })
+                            HomeEntry(R.drawable.icon_social, "同袍社交", onClick = onOpenSocial)
+                            HomeEntry(R.drawable.icon_shop, "汉服商城", onClick = onOpenMall)
+                            HomeEntry(R.drawable.icon_travel, "文旅服务", onClick = { /* TODO: travel */ })
+                            HomeEntry(R.drawable.icon_culture, "文化传承", onClick = { /* TODO: culture */ })
                         }
                     }
 
@@ -356,7 +365,7 @@ private fun BannerCarousel(banners: List<BannerItem>) {
 
 @Composable
 private fun HomeEntry(
-    emoji: String,
+    iconRes: Int,
     label: String,
     onClick: () -> Unit,
 ) {
@@ -366,12 +375,11 @@ private fun HomeEntry(
             .clickable(onClick = onClick)
             .padding(Spacing.xs),
     ) {
-        Box(
-            modifier = Modifier.size(48.dp),
-            contentAlignment = Alignment.Center,
-        ) {
-            Text(text = emoji, style = MaterialTheme.typography.headlineSmall)
-        }
+        Image(
+            painter = painterResource(iconRes),
+            contentDescription = label,
+            modifier = Modifier.size(44.dp),
+        )
         Spacer(Modifier.height(Spacing.xs))
         Text(
             text = label,
