@@ -10,13 +10,16 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
+import androidx.compose.foundation.lazy.staggeredgrid.items
+import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
@@ -69,7 +72,7 @@ fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
-    val listState = rememberLazyListState()
+    val gridState = rememberLazyStaggeredGridState()
 
     // 发动态成功返回首页后刷新推荐流
     LaunchedEffect(refreshSignal) {
@@ -82,8 +85,8 @@ fun HomeScreen(
     // 检测滚动到底部触发 loadMore
     val shouldLoadMore by remember {
         derivedStateOf {
-            val last = listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
-            last >= listState.layoutInfo.totalItemsCount - 3
+            val last = gridState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
+            last >= gridState.layoutInfo.totalItemsCount - 3
         }
     }
     LaunchedEffect(shouldLoadMore, state.feedHasMore, state.feedLoadingMore) {
@@ -113,12 +116,17 @@ fun HomeScreen(
                     onRefresh = { viewModel.refresh() },
                     modifier = Modifier.fillMaxSize(),
                 ) {
-                LazyColumn(
-                    state = listState,
-                    modifier = Modifier.fillMaxSize().padding(horizontal = Spacing.lg),
+                LazyVerticalStaggeredGrid(
+                    columns = StaggeredGridCells.Fixed(2),
+                    state = gridState,
+                    contentPadding = PaddingValues(horizontal = Spacing.lg),
+                    horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+                    verticalItemSpacing = Spacing.sm,
+                    modifier = Modifier.fillMaxSize(),
                 ) {
                     // ── 顶栏：搜索 + 铃铛 ──
-                    item(key = "top_bar") {
+                    item(key = "top_bar", span = StaggeredGridItemSpan.FullLine) {
+                        Column {
                         Spacer(Modifier.height(Spacing.md))
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Box(modifier = Modifier.weight(1f)) {
@@ -155,12 +163,14 @@ fun HomeScreen(
                                 }
                             }
                         }
+                        }
                     }
 
                     // ── 欢迎行 ──
                     val p = state.profile
                     if (p != null) {
-                        item(key = "welcome") {
+                        item(key = "welcome", span = StaggeredGridItemSpan.FullLine) {
+                            Column {
                             Spacer(Modifier.height(Spacing.md))
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Text(
@@ -179,19 +189,23 @@ fun HomeScreen(
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.tertiary,
                             )
+                            }
                         }
                     }
 
                     // ── Banner 轮播 ──
                     if (state.banners.isNotEmpty()) {
-                        item(key = "banner") {
-                            Spacer(Modifier.height(Spacing.lg))
-                            BannerCarousel(banners = state.banners)
+                        item(key = "banner", span = StaggeredGridItemSpan.FullLine) {
+                            Column {
+                                Spacer(Modifier.height(Spacing.lg))
+                                BannerCarousel(banners = state.banners)
+                            }
                         }
                     }
 
                     // ── 功能导航 5 入口 ──
-                    item(key = "nav_entries") {
+                    item(key = "nav_entries", span = StaggeredGridItemSpan.FullLine) {
+                        Column {
                         Spacer(Modifier.height(Spacing.xl))
                         SectionTitle("探索")
                         Spacer(Modifier.height(Spacing.md))
@@ -205,20 +219,23 @@ fun HomeScreen(
                             HomeEntry(R.drawable.icon_travel, "文旅服务", onClick = { /* TODO: travel */ })
                             HomeEntry(R.drawable.icon_culture, "文化传承", onClick = { /* TODO: culture */ })
                         }
+                        }
                     }
 
                     // ── 推荐流标题 ──
-                    item(key = "feed_section_title") {
-                        Spacer(Modifier.height(Spacing.lg))
-                        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-                        Spacer(Modifier.height(Spacing.lg))
-                        SectionTitle("为你推荐")
+                    item(key = "feed_section_title", span = StaggeredGridItemSpan.FullLine) {
+                        Column {
+                            Spacer(Modifier.height(Spacing.lg))
+                            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                            Spacer(Modifier.height(Spacing.lg))
+                            SectionTitle("为你推荐")
+                        }
                     }
 
                     // ── 推荐流 ──
                     when {
                         state.feedLoading && state.feedItems.isEmpty() ->
-                            item(key = "feed_loading") {
+                            item(key = "feed_loading", span = StaggeredGridItemSpan.FullLine) {
                                 Box(
                                     Modifier.fillMaxWidth().height(120.dp),
                                     contentAlignment = Alignment.Center,
@@ -226,7 +243,7 @@ fun HomeScreen(
                             }
 
                         state.feedError != null && state.feedItems.isEmpty() ->
-                            item(key = "feed_error") {
+                            item(key = "feed_error", span = StaggeredGridItemSpan.FullLine) {
                                 Box(
                                     Modifier.fillMaxWidth().height(120.dp),
                                     contentAlignment = Alignment.Center,
@@ -239,7 +256,7 @@ fun HomeScreen(
                             }
 
                         state.feedItems.isEmpty() ->
-                            item(key = "feed_empty") {
+                            item(key = "feed_empty", span = StaggeredGridItemSpan.FullLine) {
                                 Box(
                                     Modifier.fillMaxWidth().height(120.dp),
                                     contentAlignment = Alignment.Center,
@@ -262,7 +279,7 @@ fun HomeScreen(
                                 )
                             }
                             if (state.feedLoadingMore) {
-                                item(key = "feed_load_more") {
+                                item(key = "feed_load_more", span = StaggeredGridItemSpan.FullLine) {
                                     Box(
                                         Modifier.fillMaxWidth().height(48.dp),
                                         contentAlignment = Alignment.Center,
@@ -275,7 +292,7 @@ fun HomeScreen(
                     }
 
                     // 底部留白
-                    item(key = "bottom_spacer") {
+                    item(key = "bottom_spacer", span = StaggeredGridItemSpan.FullLine) {
                         Spacer(Modifier.height(Spacing.xxl))
                     }
                 }
