@@ -46,6 +46,9 @@ import com.example.hytp.feature.social.ui.FeedPublishScreen
 import com.example.hytp.feature.social.ui.UserProfileScreen
 import com.example.hytp.feature.address.ui.AddressScreen
 import com.example.hytp.feature.ai.ui.QaScreen
+import com.example.hytp.feature.beginner.ui.BeginnerGuideScreen
+import com.example.hytp.feature.content.ui.ContentDetailScreen
+import com.example.hytp.feature.content.ui.ContentListScreen
 
 /**
  * 主页面骨架：底部 4 Tab 导航（首页/社交/商城/我的），每 Tab 独立导航栈。
@@ -181,9 +184,44 @@ private fun HomeNavHost(
                     onSwitchTab(BottomTab.Social)
                     socialNavController.navigate(Routes.userProfile(id))
                 },
+                onOpenBeginner = { navController.navigate(Routes.BEGINNER_GUIDE) },
+                onOpenTravel = { navController.navigate(Routes.contentList(1)) },
+                onOpenCulture = { navController.navigate(Routes.contentList(2)) },
                 refreshSignal = feedDirty,
                 onRefreshConsumed = onFeedRefreshed,
             )
+        }
+        composable(Routes.BEGINNER_GUIDE) {
+            BeginnerGuideScreen(
+                onBack = { navController.popBackStack() },
+                onOpenSocial = {
+                    onSwitchTab(BottomTab.Social)
+                    socialNavController.navigate(TabRoutes.SOCIAL_ROOT) {
+                        popUpTo(TabRoutes.SOCIAL_ROOT) { inclusive = true }
+                    }
+                },
+                onOpenMall = {
+                    onSwitchTab(BottomTab.Mall)
+                    mallNavController.navigate(TabRoutes.MALL_ROOT) {
+                        popUpTo(TabRoutes.MALL_ROOT) { inclusive = true }
+                    }
+                },
+            )
+        }
+        composable(
+            route = Routes.CONTENT_LIST,
+            arguments = listOf(navArgument("type") { type = NavType.StringType }),
+        ) {
+            ContentListScreen(
+                onBack = { navController.popBackStack() },
+                onItemClick = { id -> navController.navigate(Routes.contentDetail(id)) },
+            )
+        }
+        composable(
+            route = Routes.CONTENT_DETAIL,
+            arguments = listOf(navArgument("id") { type = NavType.StringType }),
+        ) {
+            ContentDetailScreen(onBack = { navController.popBackStack() })
         }
     }
 }

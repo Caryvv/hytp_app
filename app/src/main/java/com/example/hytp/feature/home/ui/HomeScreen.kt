@@ -67,6 +67,9 @@ fun HomeScreen(
     onOpenSearch: () -> Unit = {},
     onFeedClick: (Long) -> Unit = {},
     onAuthorClick: (Long) -> Unit = {},
+    onOpenBeginner: () -> Unit = {},
+    onOpenTravel: () -> Unit = {},
+    onOpenCulture: () -> Unit = {},
     refreshSignal: Boolean = false,
     onRefreshConsumed: () -> Unit = {},
     viewModel: HomeViewModel = hiltViewModel(),
@@ -213,11 +216,11 @@ fun HomeScreen(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceEvenly,
                         ) {
-                            HomeEntry(R.drawable.icon_beginner, "萌新入门", onClick = { /* TODO: newbie guide */ })
+                            HomeEntry(R.drawable.icon_beginner, "萌新入门", onClick = onOpenBeginner)
                             HomeEntry(R.drawable.icon_social, "同袍社交", onClick = onOpenSocial)
                             HomeEntry(R.drawable.icon_shop, "汉服商城", onClick = onOpenMall)
-                            HomeEntry(R.drawable.icon_travel, "文旅服务", onClick = { /* TODO: travel */ })
-                            HomeEntry(R.drawable.icon_culture, "文化传承", onClick = { /* TODO: culture */ })
+                            HomeEntry(R.drawable.icon_travel, "文旅服务", onClick = onOpenTravel)
+                            HomeEntry(R.drawable.icon_culture, "文化传承", onClick = onOpenCulture)
                         }
                         }
                     }

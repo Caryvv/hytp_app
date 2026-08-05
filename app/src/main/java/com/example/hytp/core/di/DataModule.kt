@@ -6,6 +6,7 @@ import com.example.hytp.core.data.AiRepository
 import com.example.hytp.core.data.AuthRepository
 import com.example.hytp.core.data.CartRepository
 import com.example.hytp.core.data.ChatRepository
+import com.example.hytp.core.data.ContentRepository
 import com.example.hytp.core.data.GroupRepository
 import com.example.hytp.core.data.HomeRepository
 import com.example.hytp.core.data.OrderRepository
@@ -120,4 +121,10 @@ object DataModule {
     fun provideAiRepository(
         api: HytpApiService,
     ): AiRepository = AiRepository(api)
+
+    @Provides
+    @Singleton
+    fun provideContentRepository(
+        api: HytpApiService,
+    ): ContentRepository = ContentRepository(api)
 }

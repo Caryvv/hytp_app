@@ -9,6 +9,12 @@ import com.example.hytp.core.network.dto.AddressRequest
 import com.example.hytp.core.network.dto.CartItem
 import com.example.hytp.core.network.dto.CartList
 import com.example.hytp.core.network.dto.Category
+import com.example.hytp.core.network.dto.ContentDetail
+import com.example.hytp.core.network.dto.ContentFavoriteResult
+import com.example.hytp.core.network.dto.ContentLikeResult
+import com.example.hytp.core.network.dto.ContentListItem
+import com.example.hytp.core.network.dto.EnrollResult
+import com.example.hytp.core.network.dto.SignupRequest
 import com.example.hytp.core.network.dto.CreateOrderRequest
 import com.example.hytp.core.network.dto.CreateOrderResult
 import com.example.hytp.core.network.dto.DepositClaimRequest
@@ -146,6 +152,39 @@ interface HytpApiService {
         @Query("page") page: Int,
         @Query("pageSize") pageSize: Int,
     ): ApiResponse<PageData<ProductListItem>>
+
+    // ---------------- 文旅 + 文化传承 内容（列表/详情免登录，互动需登录） ----------------
+
+    /** 内容列表（type/city/category/sort/page/pageSize，空值不传）。 */
+    @GET("contents")
+    suspend fun getContents(@QueryMap query: Map<String, String>): ApiResponse<PageData<ContentListItem>>
+
+    /** 内容详情。 */
+    @GET("contents/{id}")
+    suspend fun getContentDetail(@Path("id") id: Long): ApiResponse<ContentDetail>
+
+    @POST("contents/{id}/like")
+    suspend fun likeContent(@Path("id") id: Long): ApiResponse<ContentLikeResult>
+
+    @POST("contents/{id}/unlike")
+    suspend fun unlikeContent(@Path("id") id: Long): ApiResponse<ContentLikeResult>
+
+    @POST("contents/{id}/favorite")
+    suspend fun favoriteContent(@Path("id") id: Long): ApiResponse<ContentFavoriteResult>
+
+    @POST("contents/{id}/unfavorite")
+    suspend fun unfavoriteContent(@Path("id") id: Long): ApiResponse<ContentFavoriteResult>
+
+    /** 报名预约，Idempotency-Key 防重复提交。 */
+    @POST("contents/{id}/signup")
+    suspend fun signupContent(
+        @Path("id") id: Long,
+        @Header("Idempotency-Key") idempotencyKey: String,
+        @Body body: SignupRequest,
+    ): ApiResponse<EnrollResult>
+
+    @POST("contents/{id}/cancel-signup")
+    suspend fun cancelSignupContent(@Path("id") id: Long): ApiResponse<EnrollResult>
 
     // ---------------- 交易闭环（阶段3，均需登录，走 AuthInterceptor 自动带 token） ----------------
 

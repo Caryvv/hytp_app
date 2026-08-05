@@ -10,6 +10,15 @@ object Routes {
     const val LOGIN = "login"
     const val MAIN = "main"
 
+    // ── 首页 Tab 子页面 ──
+    const val BEGINNER_GUIDE = "beginner_guide"
+    // 文旅/文化内容：列表按 type 区分（1文旅 2文化传承），详情按 id
+    const val CONTENT_LIST = "content_list/{type}"
+    const val CONTENT_DETAIL = "content_detail/{id}"
+
+    fun contentList(type: Int): String = "content_list/$type"
+    fun contentDetail(id: Long): String = "content_detail/$id"
+
     // ── 交易区路由（商城 & 我的 Tab 共用） ──
     const val MALL = "mall"
     const val SEARCH = "search"
