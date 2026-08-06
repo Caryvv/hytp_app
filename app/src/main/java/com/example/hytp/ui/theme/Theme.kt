@@ -32,7 +32,8 @@ private val LightColorScheme = lightColorScheme(
     background = YueBai,
     onBackground = MoHei,
 
-    surface = YueBaiPure,
+    // surface 用月白（与背景同色），顶栏/卡片不再近白；层次靠 surfaceVariant + tonalElevation
+    surface = YueBai,
     onSurface = MoHei,
 
     surfaceVariant = XuanZhi,
