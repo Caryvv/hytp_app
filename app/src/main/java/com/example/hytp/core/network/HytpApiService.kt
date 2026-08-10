@@ -14,6 +14,11 @@ import com.example.hytp.core.network.dto.ContentFavoriteResult
 import com.example.hytp.core.network.dto.ContentLikeResult
 import com.example.hytp.core.network.dto.ContentListItem
 import com.example.hytp.core.network.dto.EnrollResult
+import com.example.hytp.core.network.dto.AddAvatarRequest
+import com.example.hytp.core.network.dto.AvatarList
+import com.example.hytp.core.network.dto.SubmitTryonRequest
+import com.example.hytp.core.network.dto.TryonTask
+import com.example.hytp.core.network.dto.UserAvatar
 import com.example.hytp.core.network.dto.SignupRequest
 import com.example.hytp.core.network.dto.CreateOrderRequest
 import com.example.hytp.core.network.dto.CreateOrderResult
@@ -185,6 +190,35 @@ interface HytpApiService {
 
     @POST("contents/{id}/cancel-signup")
     suspend fun cancelSignupContent(@Path("id") id: Long): ApiResponse<EnrollResult>
+
+    // ---------------- AI 试衣（需登录） ----------------
+
+    /** 提交试衣任务，返回处理中的任务（含 id，前端据此轮询）。 */
+    @POST("tryon/submit")
+    suspend fun submitTryon(@Body body: SubmitTryonRequest): ApiResponse<TryonTask>
+
+    /** 轮询任务结果。 */
+    @GET("tryon/tasks/{id}")
+    suspend fun pollTryon(@Path("id") id: Long): ApiResponse<TryonTask>
+
+    /** 我的试衣历史（分页）。 */
+    @GET("tryon/tasks")
+    suspend fun getMyTryonTasks(
+        @Query("page") page: Int,
+        @Query("pageSize") pageSize: Int,
+    ): ApiResponse<PageData<TryonTask>>
+
+    /** 我的可复用形象列表。 */
+    @GET("tryon/avatars")
+    suspend fun getAvatars(): ApiResponse<AvatarList>
+
+    /** 新增形象。 */
+    @POST("tryon/avatars")
+    suspend fun addAvatar(@Body body: AddAvatarRequest): ApiResponse<UserAvatar>
+
+    /** 删除形象。 */
+    @DELETE("tryon/avatars/{id}")
+    suspend fun deleteAvatar(@Path("id") id: Long): ApiResponse<Unit>
 
     // ---------------- 交易闭环（阶段3，均需登录，走 AuthInterceptor 自动带 token） ----------------
 

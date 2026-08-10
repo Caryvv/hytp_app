@@ -28,6 +28,12 @@ object Routes {
     fun productDetail(id: Long): String = "product/$id"
     fun shop(id: Long): String = "shop/$id"
 
+    // AI 试衣（商城 Tab；试穿页按 productId，历史静态）
+    const val TRYON = "tryon/{productId}"
+    const val MY_TRYON = "my_tryon"
+
+    fun tryon(productId: Long): String = "tryon/$productId"
+
     const val CART = "cart"
     const val CHECKOUT = "checkout"
     const val ADDRESS = "address"

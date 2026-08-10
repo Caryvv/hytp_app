@@ -67,6 +67,7 @@ fun ProductDetailScreen(
     onShopClick: (Long) -> Unit,
     onGoCart: () -> Unit,
     onRentBooked: (String) -> Unit,
+    onOpenTryon: (Long) -> Unit = {},
     viewModel: ProductDetailViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -157,6 +158,7 @@ fun ProductDetailScreen(
                         detail = state.detail!!,
                         reviews = state.reviews,
                         onShopClick = onShopClick,
+                        onOpenTryon = onOpenTryon,
                     )
             }
         }
@@ -317,6 +319,7 @@ private fun DetailContent(
     detail: ProductDetail,
     reviews: List<Review>,
     onShopClick: (Long) -> Unit,
+    onOpenTryon: (Long) -> Unit = {},
 ) {
     LazyColumn(Modifier.fillMaxSize()) {
         // 主图
@@ -345,6 +348,13 @@ private fun DetailContent(
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
+                // AI 试穿：仅当商家挂了试穿素材（tryon_model_url）时显示
+                if (!detail.tryonModelUrl.isNullOrBlank()) {
+                    Spacer(Modifier.height(12.dp))
+                    OutlinedButton(onClick = { onOpenTryon(detail.id) }) {
+                        Text("✨ AI 试穿")
+                    }
+                }
             }
         }
         // 规格

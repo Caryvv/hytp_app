@@ -49,6 +49,8 @@ import com.example.hytp.feature.ai.ui.QaScreen
 import com.example.hytp.feature.beginner.ui.BeginnerGuideScreen
 import com.example.hytp.feature.content.ui.ContentDetailScreen
 import com.example.hytp.feature.content.ui.ContentListScreen
+import com.example.hytp.feature.tryon.ui.TryonScreen
+import com.example.hytp.feature.tryon.ui.MyTryonScreen
 
 /**
  * 主页面骨架：底部 4 Tab 导航（首页/社交/商城/我的），每 Tab 独立导航栈。
@@ -343,7 +345,20 @@ private fun MallNavHost(
                 onShopClick = { id -> navController.navigate(Routes.shop(id)) },
                 onGoCart = { navController.navigate(Routes.CART) },
                 onRentBooked = { orderNo -> navController.navigate(Routes.orderDetail(orderNo)) },
+                onOpenTryon = { productId -> navController.navigate(Routes.tryon(productId)) },
             )
+        }
+        composable(
+            route = Routes.TRYON,
+            arguments = listOf(navArgument("productId") { type = NavType.StringType }),
+        ) {
+            TryonScreen(
+                onBack = { navController.popBackStack() },
+                onOpenMyTryon = { navController.navigate(Routes.MY_TRYON) },
+            )
+        }
+        composable(Routes.MY_TRYON) {
+            MyTryonScreen(onBack = { navController.popBackStack() })
         }
         composable(
             route = Routes.SHOP,
