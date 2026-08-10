@@ -196,11 +196,11 @@ private fun DetailContent(c: ContentDetail) {
                 }
             }
         }
-        // 图集（首图之外的其余图）
-        if (c.images.size > 1) {
-            items(c.images.drop(1).size) { i ->
+        // 图集（cover 与 images 是独立字段，全部展示，不跳过任何一张）
+        if (c.images.isNotEmpty()) {
+            items(c.images.size) { i ->
                 AsyncImage(
-                    model = c.images.drop(1)[i],
+                    model = c.images[i],
                     contentDescription = null,
                     contentScale = ContentScale.FillWidth,
                     modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
