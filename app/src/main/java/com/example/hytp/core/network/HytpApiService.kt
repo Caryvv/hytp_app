@@ -16,6 +16,7 @@ import com.example.hytp.core.network.dto.ContentListItem
 import com.example.hytp.core.network.dto.EnrollResult
 import com.example.hytp.core.network.dto.AddAvatarRequest
 import com.example.hytp.core.network.dto.AvatarList
+import com.example.hytp.core.network.dto.IdResult
 import com.example.hytp.core.network.dto.SubmitTryonRequest
 import com.example.hytp.core.network.dto.TryonTask
 import com.example.hytp.core.network.dto.UserAvatar
@@ -208,9 +209,9 @@ interface HytpApiService {
         @Query("pageSize") pageSize: Int,
     ): ApiResponse<PageData<TryonTask>>
 
-    /** 软删除试衣记录。 */
+    /** 软删除试衣记录。返回 { id }，不能用 Unit（Moshi 无 Unit 适配器，请求发出前即抛异常）。 */
     @DELETE("tryon/tasks/{id}")
-    suspend fun deleteTryonTask(@Path("id") id: Long): ApiResponse<Unit>
+    suspend fun deleteTryonTask(@Path("id") id: Long): ApiResponse<IdResult>
 
     /** 我的可复用形象列表。 */
     @GET("tryon/avatars")
@@ -220,9 +221,9 @@ interface HytpApiService {
     @POST("tryon/avatars")
     suspend fun addAvatar(@Body body: AddAvatarRequest): ApiResponse<UserAvatar>
 
-    /** 删除形象。 */
+    /** 删除形象。返回 { id }，同 deleteTryonTask 不能用 Unit。 */
     @DELETE("tryon/avatars/{id}")
-    suspend fun deleteAvatar(@Path("id") id: Long): ApiResponse<Unit>
+    suspend fun deleteAvatar(@Path("id") id: Long): ApiResponse<IdResult>
 
     // ---------------- 交易闭环（阶段3，均需登录，走 AuthInterceptor 自动带 token） ----------------
 

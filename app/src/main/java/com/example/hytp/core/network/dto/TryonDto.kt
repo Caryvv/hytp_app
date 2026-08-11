@@ -45,3 +45,8 @@ data class SubmitTryonRequest(
 data class AddAvatarRequest(
     val imageUrl: String,
 )
+
+/** 删除类接口返回体 { id }（不能用 Unit —— Moshi 无法为 Unit 建转换器，请求会在发出前抛异常）。 */
+data class IdResult(
+    val id: Long = 0,
+)

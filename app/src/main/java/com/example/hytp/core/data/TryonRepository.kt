@@ -3,6 +3,7 @@ package com.example.hytp.core.data
 import com.example.hytp.core.network.ApiResult
 import com.example.hytp.core.network.HytpApiService
 import com.example.hytp.core.network.dto.AddAvatarRequest
+import com.example.hytp.core.network.dto.IdResult
 import com.example.hytp.core.network.dto.PageData
 import com.example.hytp.core.network.dto.SubmitTryonRequest
 import com.example.hytp.core.network.dto.TryonTask
@@ -29,7 +30,7 @@ class TryonRepository(
         safeApiCall { api.getMyTryonTasks(page, pageSize) }
 
     /** 软删除试衣记录。 */
-    suspend fun deleteTask(id: Long): ApiResult<Unit> =
+    suspend fun deleteTask(id: Long): ApiResult<IdResult> =
         safeApiCall { api.deleteTryonTask(id) }
 
     /** 我的可复用形象列表。 */
@@ -46,6 +47,6 @@ class TryonRepository(
         safeApiCall { api.addAvatar(AddAvatarRequest(imageUrl)) }
 
     /** 删除形象。 */
-    suspend fun deleteAvatar(id: Long): ApiResult<Unit> =
+    suspend fun deleteAvatar(id: Long): ApiResult<IdResult> =
         safeApiCall { api.deleteAvatar(id) }
 }

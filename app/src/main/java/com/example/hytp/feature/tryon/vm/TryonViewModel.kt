@@ -24,6 +24,8 @@ data class TryonUiState(
     val uploading: Boolean = false,        // 上传新照中
     val submitting: Boolean = false,       // 提交任务中
     val polling: Boolean = false,          // 轮询结果中
+    val progress: Float = 0f,              // 估算进度 0~1（阿里云不返真实进度，按耗时估算）
+    val etaSeconds: Int = 0,               // 预计剩余秒数
     val resultUrl: String? = null,         // 成功结果图
     val error: String? = null,
     val message: String? = null,
@@ -46,8 +48,10 @@ class TryonViewModel @Inject constructor(
     val uiState: StateFlow<TryonUiState> = _uiState.asStateFlow()
 
     private companion object {
-        const val POLL_INTERVAL_MS = 2500L
-        const val POLL_MAX = 40 // 40 * 2.5s = 100s 上限
+        const val TICK_MS = 500L            // 进度刷新节拍
+        const val POLL_EVERY_TICKS = 5      // 每 5 拍(2.5s)查一次真结果
+        const val ESTIMATE_MS = 25000L      // 官方 15~30s，取 25s 做进度估算（非真实进度）
+        const val MAX_TICKS = 200           // 100s 上限，防死循环
     }
 
     init {
@@ -112,7 +116,9 @@ class TryonViewModel @Inject constructor(
             return
         }
         if (_uiState.value.submitting || _uiState.value.polling) return
-        _uiState.update { it.copy(submitting = true, error = null, resultUrl = null) }
+        _uiState.update {
+            it.copy(submitting = true, error = null, resultUrl = null, progress = 0f, etaSeconds = (ESTIMATE_MS / 1000).toInt())
+        }
         viewModelScope.launch {
             when (val r = tryonRepository.submit(productId, person)) {
                 is ApiResult.Success -> {
@@ -125,28 +131,44 @@ class TryonViewModel @Inject constructor(
         }
     }
 
+    /**
+     * 轮询结果 + 估算进度。阿里云不返真实进度，按 ESTIMATE_MS 线性估算，封顶 0.95 等真结果，
+     * 出图跳满。每 TICK_MS 刷新进度/倒计时，每 POLL_EVERY_TICKS 拍查一次真状态。
+     */
     private suspend fun pollUntilDone(taskId: Long) {
-        repeat(POLL_MAX) {
-            delay(POLL_INTERVAL_MS)
-            when (val r = tryonRepository.poll(taskId)) {
-                is ApiResult.Success -> {
-                    val task = r.data
-                    when (task.status) {
+        val start = System.currentTimeMillis()
+        var ticks = 0
+        while (ticks < MAX_TICKS) {
+            delay(TICK_MS)
+            ticks++
+            val elapsed = System.currentTimeMillis() - start
+            val progress = (elapsed.toFloat() / ESTIMATE_MS).coerceAtMost(0.95f)
+            val eta = ((ESTIMATE_MS - elapsed) / 1000).coerceAtLeast(0).toInt()
+            _uiState.update { it.copy(progress = progress, etaSeconds = eta) }
+
+            if (ticks % POLL_EVERY_TICKS == 0) {
+                when (val r = tryonRepository.poll(taskId)) {
+                    is ApiResult.Success -> when (r.data.status) {
                         TryonTask.STATUS_SUCCESS -> {
-                            _uiState.update { it.copy(polling = false, resultUrl = task.resultUrl) }
+                            _uiState.update { it.copy(polling = false, progress = 1f, etaSeconds = 0, resultUrl = r.data.resultUrl) }
                             return
                         }
                         TryonTask.STATUS_FAILED -> {
-                            _uiState.update { it.copy(polling = false, error = task.failReason.ifBlank { "AI 试衣失败，请重试" }) }
+                            _uiState.update { it.copy(polling = false, error = r.data.failReason.ifBlank { "AI 试衣失败，请重试" }) }
                             return
                         }
-                        // 处理中：继续轮询
+                        // 处理中：继续
                     }
+                    // 后端明确业务失败（如 1804 生成失败）：停下报错，不空轮到超时
+                    is ApiResult.Error -> {
+                        _uiState.update { it.copy(polling = false, error = r.message) }
+                        return
+                    }
+                    // 网络抖动：忽略，下次继续轮
+                    is ApiResult.Failure -> Unit
                 }
-                else -> Unit // 单次轮询失败忽略，下次继续
             }
         }
-        // 超时
         _uiState.update { it.copy(polling = false, error = "试衣超时，请稍后在「我的试衣」查看") }
     }
 }

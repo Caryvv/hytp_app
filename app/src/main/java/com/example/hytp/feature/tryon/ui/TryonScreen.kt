@@ -21,6 +21,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -116,14 +117,37 @@ fun TryonScreen(
                 contentAlignment = Alignment.Center,
             ) {
                 when {
-                    busy -> Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        CircularProgressIndicator()
-                        Spacer(Modifier.height(12.dp))
-                        Text(
-                            if (state.submitting) "正在提交…" else "AI 正在为你试穿，请稍候…",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
+                    busy -> Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp),
+                    ) {
+                        if (state.submitting) {
+                            CircularProgressIndicator()
+                            Spacer(Modifier.height(12.dp))
+                            Text(
+                                "正在提交…",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        } else {
+                            // 轮询中：估算进度条 + 百分比 + 预计剩余秒（阿里云不返真实进度，按耗时估算）
+                            Text(
+                                "AI 正在为你试穿…",
+                                style = MaterialTheme.typography.titleMedium,
+                            )
+                            Spacer(Modifier.height(16.dp))
+                            LinearProgressIndicator(
+                                progress = { state.progress },
+                                modifier = Modifier.fillMaxWidth(),
+                            )
+                            Spacer(Modifier.height(8.dp))
+                            Text(
+                                "${(state.progress * 100).toInt()}%" +
+                                    if (state.etaSeconds > 0) " · 预计还需 ${state.etaSeconds} 秒" else " · 即将完成",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
                     }
 
                     state.resultUrl != null -> AsyncImage(
