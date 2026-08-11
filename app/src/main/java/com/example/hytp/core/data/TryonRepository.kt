@@ -28,6 +28,10 @@ class TryonRepository(
     suspend fun myTasks(page: Int = 1, pageSize: Int = 20): ApiResult<PageData<TryonTask>> =
         safeApiCall { api.getMyTryonTasks(page, pageSize) }
 
+    /** 软删除试衣记录。 */
+    suspend fun deleteTask(id: Long): ApiResult<Unit> =
+        safeApiCall { api.deleteTryonTask(id) }
+
     /** 我的可复用形象列表。 */
     suspend fun avatars(): ApiResult<List<UserAvatar>> {
         return when (val r = safeApiCall { api.getAvatars() }) {

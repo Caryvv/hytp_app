@@ -53,6 +53,18 @@ class MyTryonViewModel @Inject constructor(
         }
     }
 
+    /** 软删除：先从列表乐观移除，失败回滚。 */
+    fun deleteTask(task: TryonTask) {
+        val before = _uiState.value.tasks
+        _uiState.update { it.copy(tasks = it.tasks.filter { t -> t.id != task.id }) }
+        viewModelScope.launch {
+            when (tryonRepository.deleteTask(task.id)) {
+                is ApiResult.Success -> Unit // 已乐观移除
+                else -> _uiState.update { it.copy(tasks = before, error = "删除失败，请重试") }
+            }
+        }
+    }
+
     fun loadMore() {
         val s = _uiState.value
         if (s.loading || s.loadingMore || !s.hasMore) return

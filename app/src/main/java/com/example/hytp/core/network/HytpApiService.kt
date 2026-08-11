@@ -208,6 +208,10 @@ interface HytpApiService {
         @Query("pageSize") pageSize: Int,
     ): ApiResponse<PageData<TryonTask>>
 
+    /** 软删除试衣记录。 */
+    @DELETE("tryon/tasks/{id}")
+    suspend fun deleteTryonTask(@Path("id") id: Long): ApiResponse<Unit>
+
     /** 我的可复用形象列表。 */
     @GET("tryon/avatars")
     suspend fun getAvatars(): ApiResponse<AvatarList>
