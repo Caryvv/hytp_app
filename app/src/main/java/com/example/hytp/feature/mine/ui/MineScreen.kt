@@ -129,13 +129,7 @@ fun MineScreen(
                                 variant = HanfuButtonVariant.Outline,
                                 size = HanfuButtonSize.Small,
                             )
-                            Spacer(Modifier.width(Spacing.xs))
-                            HanfuButton(
-                                text = "提现",
-                                onClick = { onOpenWithdraw(toCoin(p.balance)) },
-                                variant = HanfuButtonVariant.Outline,
-                                size = HanfuButtonSize.Small,
-                            )
+                            // 提现入口先屏蔽（WithdrawScreen 路由/VM 保留，恢复时把按钮加回即可）
                         }
                         Spacer(Modifier.height(Spacing.xs))
                         DynastyTag(

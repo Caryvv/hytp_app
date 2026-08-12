@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.hytp.core.data.TryonRepository
 import com.example.hytp.core.data.UploadRepository
 import com.example.hytp.core.network.ApiResult
+import com.example.hytp.core.network.dto.TryonQuota
 import com.example.hytp.core.network.dto.TryonTask
 import com.example.hytp.core.network.dto.UserAvatar
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -27,6 +28,7 @@ data class TryonUiState(
     val progress: Float = 0f,              // 估算进度 0~1（阿里云不返真实进度，按耗时估算）
     val etaSeconds: Int = 0,               // 预计剩余秒数
     val resultUrl: String? = null,         // 成功结果图
+    val quota: TryonQuota? = null,         // 今日配额（剩余免费次数/超额单价），null 时不展示提示
     val error: String? = null,
     val message: String? = null,
 )
@@ -56,6 +58,16 @@ class TryonViewModel @Inject constructor(
 
     init {
         loadAvatars()
+        loadQuota()
+    }
+
+    /** 加载今日配额（剩余免费次数/超额单价），失败静默（提示条不显示即可）。 */
+    private fun loadQuota() {
+        viewModelScope.launch {
+            (tryonRepository.quota() as? ApiResult.Success)?.let { r ->
+                _uiState.update { it.copy(quota = r.data) }
+            }
+        }
     }
 
     fun consumeMessage() = _uiState.update { it.copy(message = null) }
@@ -123,6 +135,7 @@ class TryonViewModel @Inject constructor(
             when (val r = tryonRepository.submit(productId, person)) {
                 is ApiResult.Success -> {
                     _uiState.update { it.copy(submitting = false, polling = true) }
+                    loadQuota() // 已消耗一次，刷新顶部剩余次数/单价提示
                     pollUntilDone(r.data.id)
                 }
                 is ApiResult.Error -> _uiState.update { it.copy(submitting = false, error = r.message) }

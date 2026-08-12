@@ -35,6 +35,14 @@ data class AvatarList(
     val list: List<UserAvatar> = emptyList(),
 )
 
+/** 今日试衣配额（对齐后端 TryonService::quota）。 */
+data class TryonQuota(
+    val isPremium: Boolean = false,
+    val freeQuota: Int = 0,
+    val freeRemaining: Int = 0,
+    val price: Int = 0,
+)
+
 /** 提交试衣请求体。 */
 data class SubmitTryonRequest(
     val productId: Long,

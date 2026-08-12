@@ -45,6 +45,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
+import com.example.hytp.core.network.dto.TryonQuota
 import com.example.hytp.core.network.dto.UserAvatar
 import com.example.hytp.core.ui.HanfuButton
 import com.example.hytp.core.ui.HanfuButtonSize
@@ -98,6 +99,10 @@ fun TryonScreen(
         Column(
             Modifier.padding(padding).fillMaxSize().padding(16.dp),
         ) {
+            state.quota?.let { q ->
+                QuotaHint(q)
+                Spacer(Modifier.height(12.dp))
+            }
             SectionTitle("选择你的照片")
             Spacer(Modifier.height(12.dp))
             AvatarRow(
@@ -175,6 +180,29 @@ fun TryonScreen(
                 modifier = Modifier.fillMaxWidth(),
             )
         }
+    }
+}
+
+@Composable
+private fun QuotaHint(q: TryonQuota) {
+    val text = if (q.freeRemaining > 0) {
+        "今日还可免费试穿 ${q.freeRemaining} 次" +
+            (if (q.isPremium) "（会员每日 ${q.freeQuota} 次）" else "")
+    } else {
+        "今日免费次数已用完，继续试穿每次消耗 ${q.price} 同袍币"
+    }
+    Box(
+        Modifier
+            .fillMaxWidth()
+            .clip(MaterialTheme.shapes.small)
+            .background(MaterialTheme.colorScheme.secondaryContainer)
+            .padding(horizontal = 12.dp, vertical = 8.dp),
+    ) {
+        Text(
+            text = text,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSecondaryContainer,
+        )
     }
 }
 

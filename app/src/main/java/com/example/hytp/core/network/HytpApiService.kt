@@ -18,6 +18,7 @@ import com.example.hytp.core.network.dto.AddAvatarRequest
 import com.example.hytp.core.network.dto.AvatarList
 import com.example.hytp.core.network.dto.IdResult
 import com.example.hytp.core.network.dto.SubmitTryonRequest
+import com.example.hytp.core.network.dto.TryonQuota
 import com.example.hytp.core.network.dto.TryonTask
 import com.example.hytp.core.network.dto.UserAvatar
 import com.example.hytp.core.network.dto.SignupRequest
@@ -197,6 +198,10 @@ interface HytpApiService {
     /** 提交试衣任务，返回处理中的任务（含 id，前端据此轮询）。 */
     @POST("tryon/submit")
     suspend fun submitTryon(@Body body: SubmitTryonRequest): ApiResponse<TryonTask>
+
+    /** 今日试衣配额（剩余免费次数 / 超额单价，供页面提示）。 */
+    @GET("tryon/quota")
+    suspend fun getTryonQuota(): ApiResponse<TryonQuota>
 
     /** 轮询任务结果。 */
     @GET("tryon/tasks/{id}")
