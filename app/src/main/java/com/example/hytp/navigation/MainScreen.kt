@@ -156,18 +156,7 @@ private fun HomeNavHost(
     ) {
         composable(TabRoutes.HOME_ROOT) {
             HomeScreen(
-                onOpenMall = {
-                    onSwitchTab(BottomTab.Mall)
-                    mallNavController.navigate(TabRoutes.MALL_ROOT) {
-                        popUpTo(TabRoutes.MALL_ROOT) { inclusive = true }
-                    }
-                },
-                onOpenSocial = {
-                    onSwitchTab(BottomTab.Social)
-                    socialNavController.navigate(TabRoutes.SOCIAL_ROOT) {
-                        popUpTo(TabRoutes.SOCIAL_ROOT) { inclusive = true }
-                    }
-                },
+                onOpenMyTryon = { navController.navigate(Routes.MY_TRYON) },
                 onOpenMessages = {
                     onSwitchTab(BottomTab.Mine)
                     mineNavController.navigate(Routes.MESSAGE_CENTER) {
@@ -192,6 +181,9 @@ private fun HomeNavHost(
                 refreshSignal = feedDirty,
                 onRefreshConsumed = onFeedRefreshed,
             )
+        }
+        composable(Routes.MY_TRYON) {
+            MyTryonScreen(onBack = { navController.popBackStack() })
         }
         composable(Routes.BEGINNER_GUIDE) {
             BeginnerGuideScreen(

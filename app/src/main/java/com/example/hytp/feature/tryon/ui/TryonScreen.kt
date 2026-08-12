@@ -154,7 +154,7 @@ fun TryonScreen(
                         model = state.resultUrl,
                         contentDescription = "试衣结果",
                         contentScale = ContentScale.Fit,
-                        modifier = Modifier.fillMaxWidth().aspectRatio(3f / 4f).clip(MaterialTheme.shapes.medium),
+                        modifier = Modifier.fillMaxSize().clip(MaterialTheme.shapes.medium),
                     )
 
                     else -> Text(
