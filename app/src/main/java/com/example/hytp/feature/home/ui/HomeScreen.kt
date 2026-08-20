@@ -181,8 +181,8 @@ fun HomeScreen(
                                 )
                                 Spacer(Modifier.width(Spacing.sm))
                                 DynastyTag(
-                                    text = if (p.memberLevel == 1) "高级会员" else "普通用户",
-                                    semantic = if (p.memberLevel == 1) TagSemantic.Member else TagSemantic.Info,
+                                    text = if (p.isPremium) "高级会员" else "普通用户",
+                                    semantic = if (p.isPremium) TagSemantic.Member else TagSemantic.Info,
                                 )
                             }
                             Spacer(Modifier.height(Spacing.xs))

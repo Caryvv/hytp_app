@@ -27,6 +27,7 @@ import com.example.hytp.feature.group.ui.GroupChatScreen
 import com.example.hytp.feature.group.ui.GroupListScreen
 import com.example.hytp.feature.home.ui.HomeScreen
 import com.example.hytp.feature.message.ui.MessageCenterScreen
+import com.example.hytp.feature.mine.ui.MembershipScreen
 import com.example.hytp.feature.mine.ui.MineScreen
 import com.example.hytp.feature.mine.ui.TaskScreen
 import com.example.hytp.feature.mine.ui.RechargeScreen
@@ -442,6 +443,7 @@ private fun MineNavHost(
                 onOpenWithdraw = { balanceCoin -> navController.navigate(Routes.withdraw(balanceCoin)) },
                 onOpenTasks = { navController.navigate(Routes.TASKS) },
                 onOpenMessages = { navController.navigate(Routes.MESSAGE_CENTER) },
+                onOpenMembership = { navController.navigate(Routes.MEMBERSHIP) },
                 refreshSignal = rechargedCoin.value,
                 onRefreshConsumed = { entry.savedStateHandle["recharged_coin"] = null },
             )
@@ -477,6 +479,17 @@ private fun MineNavHost(
                     // 复用「我的」余额刷新信号（任意非空值即触发 loadProfile）
                     navController.previousBackStackEntry
                         ?.savedStateHandle?.set("recharged_coin", balanceCoin)
+                },
+            )
+        }
+        composable(Routes.MEMBERSHIP) {
+            MembershipScreen(
+                onBack = { navController.popBackStack() },
+                onPurchased = {
+                    // 复用「我的」资料刷新信号（任意非空值即触发 loadProfile 更新会员状态与余额）
+                    navController.previousBackStackEntry
+                        ?.savedStateHandle?.set("recharged_coin", 1)
+                    navController.popBackStack()
                 },
             )
         }

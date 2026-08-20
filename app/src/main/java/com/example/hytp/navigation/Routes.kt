@@ -42,6 +42,7 @@ object Routes {
     const val RECHARGE = "recharge"
     const val WITHDRAW = "withdraw/{balanceCoin}"
     const val TASKS = "tasks"
+    const val MEMBERSHIP = "membership"
 
     fun withdraw(balanceCoin: Int): String = "withdraw/$balanceCoin"
     const val REVIEW = "review/{orderNo}/{productId}"

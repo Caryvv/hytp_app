@@ -2,6 +2,9 @@ package com.example.hytp.core.data
 
 import com.example.hytp.core.network.ApiResult
 import com.example.hytp.core.network.HytpApiService
+import com.example.hytp.core.network.dto.MembershipPlan
+import com.example.hytp.core.network.dto.MembershipPurchaseRequest
+import com.example.hytp.core.network.dto.MembershipResult
 import com.example.hytp.core.network.dto.MockConfirmRequest
 import com.example.hytp.core.network.dto.PayConfirmResult
 import com.example.hytp.core.network.dto.PayRequest
@@ -33,4 +36,12 @@ class PaymentRepository(
     /** 提现同袍币（Mock 即时扣减）。余额不足由后端返回 BALANCE_NOT_ENOUGH。 */
     suspend fun withdraw(coin: Int): ApiResult<WithdrawResult> =
         safeApiCall { api.withdraw(WithdrawRequest(coin)) }
+
+    /** 会员套餐 + 当前状态。 */
+    suspend fun membershipPlan(): ApiResult<MembershipPlan> =
+        safeApiCall { api.getMembershipPlan() }
+
+    /** 用同袍币开通/续费会员。plan = month|year。余额不足由后端返回 BALANCE_NOT_ENOUGH。 */
+    suspend fun purchaseMembership(plan: String): ApiResult<MembershipResult> =
+        safeApiCall { api.purchaseMembership(MembershipPurchaseRequest(plan)) }
 }

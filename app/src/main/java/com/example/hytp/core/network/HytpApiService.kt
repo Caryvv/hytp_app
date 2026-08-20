@@ -56,6 +56,9 @@ import com.example.hytp.core.network.dto.TipResult
 import com.example.hytp.core.network.dto.LoginRequest
 import com.example.hytp.core.network.dto.LoginResponse
 import com.example.hytp.core.network.dto.LogoutRequest
+import com.example.hytp.core.network.dto.MembershipPlan
+import com.example.hytp.core.network.dto.MembershipPurchaseRequest
+import com.example.hytp.core.network.dto.MembershipResult
 import com.example.hytp.core.network.dto.MockConfirmRequest
 import com.example.hytp.core.network.dto.Order
 import com.example.hytp.core.network.dto.OrderPreview
@@ -425,6 +428,13 @@ interface HytpApiService {
     // 同袍币提现（Mock 即时扣减）
     @POST("wallet/withdraw")
     suspend fun withdraw(@Body body: WithdrawRequest): ApiResponse<WithdrawResult>
+
+    // 会员开通/续费（同袍币购买）
+    @GET("membership/plan")
+    suspend fun getMembershipPlan(): ApiResponse<MembershipPlan>
+
+    @POST("membership/purchase")
+    suspend fun purchaseMembership(@Body body: MembershipPurchaseRequest): ApiResponse<MembershipResult>
 
     // 任务系统（赚同袍币）
     @GET("tasks")

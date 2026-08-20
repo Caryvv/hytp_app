@@ -46,6 +46,7 @@ fun MineScreen(
     onOpenWithdraw: (Int) -> Unit = {},
     onOpenTasks: () -> Unit = {},
     onOpenMessages: () -> Unit = {},
+    onOpenMembership: () -> Unit = {},
     refreshSignal: Int? = null,
     onRefreshConsumed: () -> Unit = {},
     viewModel: MineViewModel = hiltViewModel(),
@@ -132,10 +133,20 @@ fun MineScreen(
                             // 提现入口先屏蔽（WithdrawScreen 路由/VM 保留，恢复时把按钮加回即可）
                         }
                         Spacer(Modifier.height(Spacing.xs))
-                        DynastyTag(
-                            text = if (p.memberLevel == 1) "高级会员" else "普通用户",
-                            semantic = if (p.memberLevel == 1) TagSemantic.Member else TagSemantic.Info,
-                        )
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            // 看 isPremium 不看 memberLevel：到期后 level 仍是 1，单看它会误显会员
+                            DynastyTag(
+                                text = if (p.isPremium) "高级会员" else "普通用户",
+                                semantic = if (p.isPremium) TagSemantic.Member else TagSemantic.Info,
+                            )
+                            Spacer(Modifier.width(Spacing.sm))
+                            HanfuButton(
+                                text = if (p.isPremium) "续费" else "开通会员",
+                                onClick = onOpenMembership,
+                                variant = HanfuButtonVariant.Outline,
+                                size = HanfuButtonSize.Small,
+                            )
+                        }
                     }
                 }
 

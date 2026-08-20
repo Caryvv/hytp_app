@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
@@ -24,10 +25,12 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.hytp.feature.order.vm.CheckoutViewModel
+import com.example.hytp.ui.theme.Spacing
 
 /**
  * 结算页：地址选择 + 商品分组预览 + 提交下单。下单成功进订单详情（去支付）。
@@ -70,12 +73,30 @@ fun CheckoutScreen(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text("实付：", style = MaterialTheme.typography.bodyLarge)
+                    // 会员 95 折：原价划线 + 折后实付
+                    if (preview.memberDiscount) {
+                        Text(
+                            "¥${preview.totalAmount}",
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            textDecoration = TextDecoration.LineThrough,
+                            style = MaterialTheme.typography.bodyMedium,
+                        )
+                        Spacer(Modifier.width(4.dp))
+                    }
                     Text(
-                        "¥${preview.totalAmount}",
+                        "¥${preview.payAmount}",
                         color = MaterialTheme.colorScheme.tertiary,
                         fontWeight = FontWeight.Bold,
                         style = MaterialTheme.typography.titleLarge,
                     )
+                    if (preview.memberDiscount) {
+                        Spacer(Modifier.width(Spacing.sm))
+                        Text(
+                            "会员95折",
+                            color = MaterialTheme.colorScheme.tertiary,
+                            style = MaterialTheme.typography.labelSmall,
+                        )
+                    }
                     Spacer(Modifier.weight(1f))
                     Button(
                         onClick = { viewModel.submit { orderNos -> orderNos.firstOrNull()?.let(onOrderCreated) } },

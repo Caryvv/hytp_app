@@ -57,10 +57,12 @@ data class PreviewShop(
     val shipFee: String = "0.00",
 )
 
-/** 结算预览响应 data：{ shops, totalAmount }。 */
+/** 结算预览响应 data：{ shops, totalAmount 原价, payAmount 会员折后实付, memberDiscount 是否享折扣}。 */
 data class OrderPreview(
     val shops: List<PreviewShop> = emptyList(),
     val totalAmount: String = "0.00",
+    val payAmount: String = "0.00",
+    val memberDiscount: Boolean = false,
 )
 
 /** 预览/下单的直购行项（立即购买用）。 */

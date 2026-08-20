@@ -61,6 +61,7 @@ data class UserProfile(
     val city: String? = null,
     val memberLevel: Int = 0,
     val memberExpireAt: Long? = null,
+    val isPremium: Boolean = false, // 权益判定看这个：会员到期后 memberLevel 仍是 1，单看它会误显会员
     val balance: String = "0.00",
 )
 
