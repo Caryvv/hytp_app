@@ -6,11 +6,13 @@ import com.example.hytp.core.network.dto.MembershipPlan
 import com.example.hytp.core.network.dto.MembershipPurchaseRequest
 import com.example.hytp.core.network.dto.MembershipResult
 import com.example.hytp.core.network.dto.MockConfirmRequest
+import com.example.hytp.core.network.dto.PageData
 import com.example.hytp.core.network.dto.PayConfirmResult
 import com.example.hytp.core.network.dto.PayRequest
 import com.example.hytp.core.network.dto.PayResult
 import com.example.hytp.core.network.dto.RechargeRequest
 import com.example.hytp.core.network.dto.RechargeResult
+import com.example.hytp.core.network.dto.WalletTxn
 import com.example.hytp.core.network.dto.WithdrawRequest
 import com.example.hytp.core.network.dto.WithdrawResult
 import com.example.hytp.core.network.safeApiCall
@@ -44,4 +46,8 @@ class PaymentRepository(
     /** 用同袍币开通/续费会员。plan = month|year。余额不足由后端返回 BALANCE_NOT_ENOUGH。 */
     suspend fun purchaseMembership(plan: String): ApiResult<MembershipResult> =
         safeApiCall { api.purchaseMembership(MembershipPurchaseRequest(plan)) }
+
+    /** 钱包流水（倒序分页）。 */
+    suspend fun walletTransactions(page: Int, pageSize: Int): ApiResult<PageData<WalletTxn>> =
+        safeApiCall { api.getWalletTransactions(page, pageSize) }
 }

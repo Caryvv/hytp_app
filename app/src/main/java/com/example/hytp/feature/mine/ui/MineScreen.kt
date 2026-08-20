@@ -47,6 +47,7 @@ fun MineScreen(
     onOpenTasks: () -> Unit = {},
     onOpenMessages: () -> Unit = {},
     onOpenMembership: () -> Unit = {},
+    onOpenWalletTxns: () -> Unit = {},
     refreshSignal: Int? = null,
     onRefreshConsumed: () -> Unit = {},
     viewModel: MineViewModel = hiltViewModel(),
@@ -128,6 +129,13 @@ fun MineScreen(
                                 text = "充值",
                                 onClick = onOpenRecharge,
                                 variant = HanfuButtonVariant.Outline,
+                                size = HanfuButtonSize.Small,
+                            )
+                            Spacer(Modifier.width(Spacing.sm))
+                            HanfuButton(
+                                text = "明细",
+                                onClick = onOpenWalletTxns,
+                                variant = HanfuButtonVariant.Text,
                                 size = HanfuButtonSize.Small,
                             )
                             // 提现入口先屏蔽（WithdrawScreen 路由/VM 保留，恢复时把按钮加回即可）

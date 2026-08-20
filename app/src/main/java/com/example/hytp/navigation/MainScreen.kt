@@ -29,6 +29,7 @@ import com.example.hytp.feature.home.ui.HomeScreen
 import com.example.hytp.feature.message.ui.MessageCenterScreen
 import com.example.hytp.feature.mine.ui.MembershipScreen
 import com.example.hytp.feature.mine.ui.MineScreen
+import com.example.hytp.feature.mine.ui.WalletTxnScreen
 import com.example.hytp.feature.mine.ui.TaskScreen
 import com.example.hytp.feature.mine.ui.RechargeScreen
 import com.example.hytp.feature.mine.ui.WithdrawScreen
@@ -444,6 +445,7 @@ private fun MineNavHost(
                 onOpenTasks = { navController.navigate(Routes.TASKS) },
                 onOpenMessages = { navController.navigate(Routes.MESSAGE_CENTER) },
                 onOpenMembership = { navController.navigate(Routes.MEMBERSHIP) },
+                onOpenWalletTxns = { navController.navigate(Routes.WALLET_TXNS) },
                 refreshSignal = rechargedCoin.value,
                 onRefreshConsumed = { entry.savedStateHandle["recharged_coin"] = null },
             )
@@ -492,6 +494,9 @@ private fun MineNavHost(
                     navController.popBackStack()
                 },
             )
+        }
+        composable(Routes.WALLET_TXNS) {
+            WalletTxnScreen(onBack = { navController.popBackStack() })
         }
         composable(Routes.ORDER_LIST) {
             OrderListScreen(

@@ -71,6 +71,7 @@ import com.example.hytp.core.network.dto.RechargeRequest
 import com.example.hytp.core.network.dto.RechargeResult
 import com.example.hytp.core.network.dto.WithdrawRequest
 import com.example.hytp.core.network.dto.WithdrawResult
+import com.example.hytp.core.network.dto.WalletTxn
 import com.example.hytp.core.network.dto.ClaimRequest
 import com.example.hytp.core.network.dto.ClaimResult
 import com.example.hytp.core.network.dto.TaskListResult
@@ -428,6 +429,13 @@ interface HytpApiService {
     // 同袍币提现（Mock 即时扣减）
     @POST("wallet/withdraw")
     suspend fun withdraw(@Body body: WithdrawRequest): ApiResponse<WithdrawResult>
+
+    // 钱包流水（充值/消费/退款/提现等，倒序分页）
+    @GET("wallet/transactions")
+    suspend fun getWalletTransactions(
+        @Query("page") page: Int,
+        @Query("pageSize") pageSize: Int,
+    ): ApiResponse<PageData<WalletTxn>>
 
     // 会员开通/续费（同袍币购买）
     @GET("membership/plan")
